@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="cs"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<title>Shortage</title><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="desktop.css"></head>
+<body><header class="desktop-bar noprint"><div class="desktop-brand">SHORTAGE <span>Offline · Windows</span></div><span id="saveState" role="status">Načítám data…</span><nav aria-label="Data aplikace"><button type="button" class="btn sec small" id="backup">Zálohovat</button><button type="button" class="btn sec small" id="restore">Obnovit zálohu</button><button type="button" class="btn ghost small" id="history">Historie změn</button><button type="button" class="btn ghost small" id="dataFolder">Složka dat</button></nav></header>
+<main class="desktop-main"><section class="view" id="view-shortage" aria-labelledby="shTitle">
+      <header class="page-head">
+        <div>
+          <p class="eyebrow">Chybějící díly</p>
+          <h1 id="shTitle">Shortage</h1>
+          <p class="lede">Kompletní rozbor urgentních dílů ve třech krocích: tabulka urgentních dílů (barvy EANu určí TOP a TOP 2), výrobní plán (poddíly sestav a probíhající operace) a evidence pohybu (poslední interní záznam). Sloupce se rozpoznají podle nadpisů a můžeš je upravit ručně. PDF na šířku má u položky QR kód, kolonky Stav k 10:00 a 13:00 a místo na poznámky.</p>
+        </div>
+      </header>
+      <ol class="sh-steps noprint" aria-label="Rozbor shortage ve třech krocích">
+        <li class="sh-step" data-step="1"><span class="sh-stepn" aria-hidden="true">1</span><div><b>Urgentní díly</b><p class="small muted" id="shSt1">Tabulka z Excelu (soubor nebo Ctrl+V)</p></div>
+          <button class="btn small" type="button" id="shImport">Nahrát Excel</button><input type="file" id="shFile" accept=".xlsx,.xls,.xlsm,.ods" hidden></li>
+        <li class="sh-step" data-step="2"><span class="sh-stepn" aria-hidden="true">2</span><div><b>Výrobní plán</b><p class="small muted" id="shSt2">Poddíly sestav a probíhající operace</p></div>
+          <button class="btn sec small" type="button" id="shPlanBtn">Výrobní plán</button><input type="file" id="shPlanFile" accept=".xlsx,.xlsm,.xls,.ods" hidden></li>
+        <li class="sh-step" data-step="3"><span class="sh-stepn" aria-hidden="true">3</span><div><b>Evidence pohybu</b><p class="small muted" id="shSt3">Poslední interní záznamy (soubor nebo Ctrl+V)</p></div>
+          <button class="btn sec small" type="button" id="shMoveBtn">Evidence pohybu</button><input type="file" id="shMoveFile" accept=".xlsx,.xls,.xlsm,.ods,.csv,.txt" hidden></li>
+      </ol>
+      <div id="shMergeBar" class="sh-mergebar noprint" role="status" hidden></div>
+      <label class="sh-paste noprint" for="shPaste">
+        <span><b>Vložit z Excelu</b> · označ v Excelu řádky (i s nadpisy), Ctrl+C, klikni sem a Ctrl+V. Seznam dílů se vloží i s odkazy z EANu. Evidence pohybu (QR kód, datum a čas, počet ks, stav) se přiřadí k položkám otevřeného seznamu.</span>
+        <textarea id="shPaste" rows="1" placeholder="Sem vlož tabulku (Ctrl+V)" autocomplete="off" spellcheck="false"></textarea>
+      </label>
+      <div id="shMsg" class="sh-msg noprint" aria-live="polite"></div>
+      <div id="shView"></div>
+    </section></main><dialog class="dlg" id="dlg" aria-labelledby="dlgTitle">
+  <form method="dialog" id="dlgForm">
+    <h2 id="dlgTitle"></h2>
+    <div class="dlg-body" id="dlgBody"></div>
+    <div class="dlg-actions" id="dlgActions">
+      <button class="btn ghost" value="cancel" type="submit" id="dlgCancel" formnovalidate>Zrušit</button>
+      <button class="btn" value="ok" type="submit" id="dlgOk">OK</button>
+    </div>
+  </form>
+</dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="vendor/xlsx.full.min.js"></script><script src="vendor/jspdf.umd.min.js"></script><script src="vendor/qrcode.js"></script>
+<script src="runtime.js"></script><script src="shared.js"></script><script src="core/shortage.js"></script><script src="ui/shortage.js"></script><script src="bootstrap.js"></script></body></html>

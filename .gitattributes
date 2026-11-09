@@ -1,0 +1,2 @@
+app/vendor/** linguist-vendored -diff -whitespace
+app/fonts/** linguist-vendored -diff -whitespace

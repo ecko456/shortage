@@ -1,0 +1,16 @@
+.desktop-bar { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; flex-wrap: wrap; gap: 12px 24px; padding: 12px 24px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.desktop-brand { font: 600 21px var(--disp); letter-spacing: .04em; }
+.desktop-brand span { display: block; color: var(--ink-3); font: 12px var(--body); letter-spacing: 0; }
+.desktop-bar nav { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; }
+#saveState { color: var(--ink-2); font-size: 12px; cursor: pointer; }
+#saveState[data-state=error] { color: var(--crit); font-weight: bold; }
+.desktop-main { max-width: 1800px; margin: auto; padding: 28px 24px 64px; }
+#view-shortage { display: block; }
+.local-history { list-style: none; padding: 0; }
+.local-history li { display: grid; grid-template-columns: 140px 1fr; gap: 16px; border-bottom: 1px solid var(--line); padding: 12px 0; }
+.local-history time { color: var(--ink-3); font-size: 12px; }
+.toast { position: fixed; left: 50%; bottom: 24px; z-index: 1000; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; max-width: min(90vw, 700px); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.error { background: var(--crit); color: white; }
+@media (max-width: 1000px) { .desktop-main { padding: 20px 14px 48px; } .desktop-bar { padding: 10px 14px; } }
+@media print { .desktop-bar, .toast { display: none; } .desktop-main { padding: 0; } }

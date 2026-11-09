@@ -1,0 +1,1118 @@
+/* Sdílené styly a styly Shortage převzaté z odmeny_v2; ostatní pohledy odstraněny. */
+/* Odměny – základ vzhledu, zamykací obrazovka a QR kartička. */
+
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-sans-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-sans-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/ibm-plex-sans-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/ibm-plex-sans-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/ibm-plex-sans-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Plex"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/ibm-plex-sans-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-mono-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Plex Mono"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/ibm-plex-mono-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Plex Mono"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/ibm-plex-mono-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Plex Mono"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/ibm-plex-mono-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Barlow SC"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/barlow-semi-condensed-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+
+:root {
+  color-scheme: light;
+  --bg: #f4f3ee;
+  --bg-deep: #ebe9e1;
+  --surface: #fdfdfb;
+  --surface-2: #f3f2ec;
+  --surface-3: #e8e6dd;
+  --line: #deddd4;
+  --line-2: #c6c4b8;
+  --ink: #1b1f1d;
+  --ink-2: #555c58;
+  --ink-3: #858b86;
+  --acc: #0e6b5d;
+  --acc-2: #0a5449;
+  --acc-ink: #ffffff;
+  --acc-soft: #dcebe6;
+  --acc-line: #9bc5bb;
+  --tab: #b06f12;
+  --tab-soft: #f6e8cf;
+  --kafe: #7a4b2a;
+  --kafe-soft: #efe3d6;
+  --good: #2e7d46;
+  --good-soft: #dfeee3;
+  --warn: #9c6a12;
+  --warn-soft: #f4ead4;
+  --crit: #b0392b;
+  --crit-soft: #f6e1dd;
+  --wknd: #6a57a6;
+  --wknd-soft: #e8e3f4;
+  /* Série grafů: ověřeno validátorem palet (světlost, sytost, barvoslepost, kontrast). */
+  --ch-tab: #b06f12;
+  --ch-acc: #008876;
+  --ch-prod: #6a57a6;
+  /* Koláč dílů v profilu (2.37): kategorie v pevném pořadí, ověřeno validátorem palet. */
+  --pie-1: #2a78d6; --pie-2: #eb6834; --pie-3: #1baf7a; --pie-4: #eda100; --pie-5: #e87ba4; --pie-6: #008300; --pie-o: #a9aea9;
+  --focus: 0 0 0 3px color-mix(in srgb, var(--acc) 28%, transparent);
+  --shadow-1: 0 1px 2px rgba(24, 30, 27, .06);
+  --shadow-2: 0 1px 2px rgba(24, 30, 27, .05), 0 12px 28px -18px rgba(24, 30, 27, .28);
+  --shadow-3: 0 24px 60px -24px rgba(16, 24, 21, .38);
+  --r-sm: 9px;
+  --r: 14px;
+  --r-lg: 20px;
+  --disp: "Barlow SC", "Segoe UI Semibold", system-ui, sans-serif;
+  --body: "Plex", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  --mono: "Plex Mono", ui-monospace, Consolas, monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #101513;
+    --bg-deep: #0b0f0e;
+    --surface: #171d1b;
+    --surface-2: #1d2522;
+    --surface-3: #25302c;
+    --line: #29332f;
+    --line-2: #3b4843;
+    --ink: #e8eeeb;
+    --ink-2: #a5b0ab;
+    --ink-3: #75817c;
+    --acc: #3dbfa5;
+    --acc-2: #5fd2ba;
+    --acc-ink: #04201a;
+    --acc-soft: #12332c;
+    --acc-line: #286a5d;
+    --tab: #e2a748;
+    --tab-soft: #36280f;
+    --kafe: #d0a07c;
+    --kafe-soft: #33251b;
+    --good: #5cc481;
+    --good-soft: #15301f;
+    --warn: #e0a93a;
+    --warn-soft: #332812;
+    --crit: #ec7160;
+    --crit-soft: #3a1d19;
+    --wknd: #a996e4;
+    --wknd-soft: #272045;
+    --ch-tab: #c38323;
+    --ch-acc: #15a28b;
+    --ch-prod: #907cd1;
+    --pie-1: #3987e5; --pie-2: #d95926; --pie-3: #199e70; --pie-4: #c98500; --pie-5: #d55181; --pie-6: #008300; --pie-o: #5d6863;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .4);
+    --shadow-2: 0 1px 2px rgba(0, 0, 0, .35), 0 14px 30px -18px rgba(0, 0, 0, .8);
+    --shadow-3: 0 28px 70px -24px rgba(0, 0, 0, .85);
+  }
+}
+
+/* ==========================================================================
+   Vzhled „Sklo“ (2.47): tmavé poloprůhledné panely, oranžový akcent s podsvícením
+   (podle návrhu uživatele). Zapíná ho <html data-look="glass"> (lock.js, výchozí);
+   data-look="classic" = původní vzhled výše beze změny. PDF exporty CSS nepoužívají.
+   ========================================================================== */
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-ext-400-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 500; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-ext-500-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-ext-600-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "Jakarta"; font-style: normal; font-weight: 700; font-display: swap; src: url("fonts/plus-jakarta-sans-latin-ext-700-normal.woff2") format("woff2"); unicode-range: U+0100-02AF, U+0304, U+0308, U+0329, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF; }
+:root[data-look="glass"] {
+  color-scheme: dark;
+  --bg: #0b0c10;
+  --bg-deep: #07080b;
+  --surface: #191b21;
+  --surface-2: #22252d;
+  --surface-3: #2c3039;
+  --line: rgba(255, 255, 255, .11);
+  --line-2: rgba(255, 255, 255, .2);
+  --ink: #ffffff;
+  --ink-2: #cdd1da;
+  --ink-3: #a6abb8;
+  --acc: #ff7a2e;
+  --acc-2: #ff9150;
+  --acc-ink: #ffffff;
+  --acc-soft: rgba(255, 115, 34, .16);
+  --acc-line: rgba(255, 115, 34, .5);
+  --tab: #f2b04e;
+  --tab-soft: rgba(242, 176, 78, .15);
+  --kafe: #d9a57e;
+  --kafe-soft: rgba(217, 165, 126, .14);
+  --good: #34d08c;
+  --good-soft: rgba(38, 194, 129, .16);
+  --warn: #f2b04e;
+  --warn-soft: rgba(242, 176, 78, .15);
+  --crit: #ff6f61;
+  --crit-soft: rgba(255, 111, 97, .16);
+  --wknd: #b3a2f0;
+  --wknd-soft: rgba(169, 150, 228, .16);
+  --ch-tab: #c38323;
+  --ch-acc: #15a28b;
+  --ch-prod: #907cd1;
+  --pie-1: #3987e5; --pie-2: #d95926; --pie-3: #199e70; --pie-4: #c98500; --pie-5: #d55181; --pie-6: #008300; --pie-o: #5d6863;
+  --focus: 0 0 0 3px rgba(255, 115, 34, .35);
+  --shadow-1: inset 0 1px 1px rgba(255, 255, 255, .12);
+  --shadow-2: inset 0 1px 1px rgba(255, 255, 255, .14), 0 18px 40px -18px rgba(0, 0, 0, .7);
+  --shadow-3: inset 0 1.5px 2px rgba(255, 255, 255, .25), 0 35px 85px -12px rgba(0, 0, 0, .68);
+  --r-sm: 11px;
+  --r: 16px;
+  --r-lg: 24px;
+  --disp: "Jakarta", "Segoe UI", system-ui, sans-serif;
+  --body: "Jakarta", "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  /* sklo: plocha, okraj a rozmazání pozadí */
+  --glass: linear-gradient(135deg, rgba(255, 255, 255, .09) 0%, rgba(22, 24, 30, .5) 45%, rgba(14, 15, 20, .56) 100%);
+  --glass-soft: rgba(255, 255, 255, .06);
+  --glass-line: rgba(255, 255, 255, .16);
+  --glass-blur: blur(28px) saturate(180%);
+  --acc-grad: linear-gradient(135deg, #ff7a22 0%, #e24f00 100%);
+  --acc-glow: 0 4px 18px rgba(238, 83, 0, .45);
+}
+/* pozadí: tmavá místnost s teplým podsvícením (jen CSS, bez fotky) */
+:root[data-look="glass"] body { background: #0b0c10; }
+:root[data-look="glass"] body::before { content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(42% 38% at 72% 34%, rgba(255, 118, 30, .30), transparent 72%),
+    radial-gradient(34% 30% at 18% 78%, rgba(255, 140, 50, .16), transparent 70%),
+    radial-gradient(60% 50% at 50% 110%, rgba(44, 213, 196, .07), transparent 70%),
+    linear-gradient(180deg, #111318 0%, #0b0c10 55%, #08090c 100%); }
+:root[data-look="glass"] h1, :root[data-look="glass"] h2, :root[data-look="glass"] h3, :root[data-look="glass"] h4 { font-weight: 700; letter-spacing: -.01em; }
+:root[data-look="glass"] .eyebrow { letter-spacing: .12em; }
+:root[data-look="glass"] .btn { border-radius: 999px; }
+:root[data-look="glass"] .btn:not(.sec):not(.ghost):not(.danger) { background: var(--acc-grad); box-shadow: var(--acc-glow); }
+:root[data-look="glass"] .btn:not(.sec):not(.ghost):not(.danger):hover { background: var(--acc-grad); filter: brightness(1.08); box-shadow: 0 6px 22px rgba(238, 83, 0, .6); }
+:root[data-look="glass"] .btn.sec { background: var(--glass-soft); border-color: var(--glass-line); color: var(--ink); }
+:root[data-look="glass"] .btn.sec:hover { background: rgba(255, 255, 255, .13); border-color: rgba(255, 255, 255, .3); }
+:root[data-look="glass"] .btn.ghost:hover { background: rgba(255, 255, 255, .1); }
+:root[data-look="glass"] .btn.small { border-radius: 999px; }
+:root[data-look="glass"] input[type="text"], :root[data-look="glass"] input:not([type]), :root[data-look="glass"] input[type="number"], :root[data-look="glass"] input[type="search"], :root[data-look="glass"] input[type="password"], :root[data-look="glass"] input[type="month"], :root[data-look="glass"] input[type="tel"], :root[data-look="glass"] input[type="date"], :root[data-look="glass"] select, :root[data-look="glass"] textarea {
+  background-color: rgba(255, 255, 255, .06); border-color: var(--glass-line); color: var(--ink); border-radius: 12px; }
+:root[data-look="glass"] select option { background: #1b1d23; color: #fff; }
+:root[data-look="glass"] .brand-mark { background: var(--acc-grad); box-shadow: var(--acc-glow), inset 0 1px 0 rgba(255, 255, 255, .3); }
+:root[data-look="glass"] .lock::before { display: none; }
+:root[data-look="glass"] .lock-card { background: var(--glass); border-color: var(--glass-line); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); box-shadow: var(--shadow-3); border-radius: 30px; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html, body { margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body { min-height: 100vh; background: var(--bg); color: var(--ink); font: 15px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4 { margin: 0; font-family: var(--disp); font-weight: 600; letter-spacing: .01em; text-wrap: balance; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+a { color: var(--acc); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--ink-2); }
+.small { font-size: 13px; }
+.tiny { font-size: 12px; }
+.eyebrow { font-family: var(--disp); font-size: 12px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+:focus-visible { outline: none; box-shadow: var(--focus); }
+
+.icon { width: 18px; height: 18px; flex: none; }
+
+/* Tlačítka a pole: sdílí zámek i aplikace. */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 8px 16px; border: 1px solid transparent; border-radius: 11px; background: var(--acc); color: var(--acc-ink); font: 600 14.5px/1.1 var(--body); text-decoration: none; transition: background .15s ease, border-color .15s ease, box-shadow .15s ease, transform .15s ease; }
+.btn:hover { background: var(--acc-2); }
+.btn:active { transform: translateY(1px); }
+.btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+.btn.big { min-height: 50px; padding: 12px 20px; font-size: 16px; border-radius: 14px; }
+.btn.wide { width: 100%; }
+.btn.sec { background: var(--surface); color: var(--ink); border-color: var(--line-2); }
+.btn.sec:hover { background: var(--surface-2); border-color: var(--ink-3); }
+.btn.ghost { background: transparent; color: var(--ink-2); }
+.btn.ghost:hover { background: var(--surface-2); color: var(--ink); }
+.btn.danger { background: transparent; color: var(--crit); border-color: color-mix(in srgb, var(--crit) 40%, var(--line)); }
+.btn.danger:hover { background: var(--crit-soft); }
+.btn.small { min-height: 32px; padding: 5px 11px; font-size: 13px; border-radius: 9px; }
+.link { background: none; border: 0; padding: 0; color: var(--acc); font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+
+.field { display: grid; gap: 6px; }
+.field > span { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+input[type="text"], input:not([type]), input[type="search"], select, textarea {
+  width: 100%; min-height: 42px; padding: 9px 12px; border: 1px solid var(--line-2); border-radius: 11px; background: var(--surface); color: var(--ink); font-size: 15px; transition: border-color .15s ease, box-shadow .15s ease;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--acc); box-shadow: var(--focus); }
+textarea { resize: vertical; min-height: 76px; }
+
+.note { padding: 11px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); font-size: 14px; }
+.note.i { background: var(--acc-soft); border-color: var(--acc-line); }
+.note.w { background: var(--warn-soft); border-color: color-mix(in srgb, var(--warn) 40%, transparent); }
+.note.e { background: var(--crit-soft); border-color: color-mix(in srgb, var(--crit) 40%, transparent); }
+.note b { font-weight: 600; }
+
+/* ---------------------------------------------------------------- zámek */
+
+/* Pozadí přihlašovací stránky (2.60, static/lockbg.js): barevná pole přes WebGL. Bez WebGL
+   třída lock-bg-on chybí a platí CSS pozadí výš. Jemný tmavý závoj drží čitelnost panelu. */
+/* tekuté sklo (liquid glass, 2.60.1): průzračné a jasné, barvy pozadí se rozlijí silným
+   rozmazáním, ale bez ztmavení; lesklá hrana (odlesk nahoře vlevo, lom světla na okrajích) */
+:root[data-look="glass"].lock-bg-on .lock-card {
+  background:
+    radial-gradient(120% 60% at 0% 0%, rgba(255, 255, 255, .22), transparent 55%),
+    radial-gradient(90% 50% at 100% 100%, rgba(255, 255, 255, .10), transparent 60%),
+    linear-gradient(160deg, rgba(255, 255, 255, .14) 0%, rgba(255, 255, 255, .05) 45%, rgba(255, 255, 255, .08) 100%),
+    rgba(24, 22, 22, .18);
+  border: 1px solid rgba(255, 255, 255, .34);
+  -webkit-backdrop-filter: blur(44px) saturate(165%);
+  backdrop-filter: blur(44px) saturate(165%);
+  box-shadow:
+    0 30px 70px -24px rgba(0, 0, 0, .55),
+    inset 1.5px 1.5px 1px -0.5px rgba(255, 255, 255, .75),
+    inset -1px -1px 1px -0.5px rgba(255, 255, 255, .35),
+    inset 0 0 22px rgba(255, 255, 255, .10),
+    inset 0 -40px 60px -50px rgba(255, 255, 255, .25); }
+:root[data-look="glass"].lock-bg-on .lock-card { --ink-2: #f1ede9; --ink-3: #e2ddd8; text-shadow: 0 1px 10px rgba(0, 0, 0, .28); }
+:root[data-look="glass"].lock-bg-on .lock-card .btn { text-shadow: none; }
+:root[data-look="glass"].lock-bg-on .lock-card input:not([type="checkbox"]):not([type="radio"]) { background-color: rgba(16, 14, 14, .30); border-color: rgba(255, 255, 255, .28); text-shadow: none; }
+
+/* PIN */
+
+/* Skener */
+
+/* QR kartička (85,6 × 54 mm) */
+.check { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; cursor: pointer; }
+.check input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--acc); flex: none; }
+
+.toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom)); z-index: 100; max-width: min(92vw, 520px); padding: 12px 18px; border-radius: 14px; background: var(--ink); color: var(--bg); font-size: 14px; box-shadow: var(--shadow-3); opacity: 0; transform: translate(-50%, 12px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+.toast.on { opacity: 1; transform: translate(-50%, 0); }
+.toast.err { background: var(--crit); color: #fff; }
+
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes shake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+@keyframes scan { 0%, 100% { transform: translateY(-120%); opacity: .4; } 50% { transform: translateY(120%); opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
+
+/* Tisk kartičky: jen kartička ve skutečné velikosti. */
+@page { margin: 10mm; }
+
+/* Odměny – vzhled aplikace po odemčení. Barvy, písma a tlačítka jsou v static/lock.css. */
+
+body { background: var(--bg); }
+
+/* ================================================================ rozvržení */
+
+.icon-btn { display: inline-grid; place-items: center; width: 36px; height: 36px; flex: none; padding: 0; border: 1px solid transparent; border-radius: 10px; background: transparent; color: var(--ink-2); transition: background .15s ease, color .15s ease, border-color .15s ease; }
+.icon-btn:hover { background: var(--surface-2); border-color: var(--line); color: var(--ink); }
+
+.nav { display: grid; gap: 3px; }
+.nav button { position: relative; display: flex; align-items: center; gap: 12px; width: 100%; min-height: 42px; padding: 9px 12px; border: 0; border-radius: 11px; background: transparent; color: var(--ink-2); font: 500 14.5px/1.2 var(--body); text-align: left; transition: background .15s ease, color .15s ease; }
+.nav button:hover { background: var(--surface-2); color: var(--ink); }
+/* Prvky jen pro telefon (tlačítko Filtry, plovoucí menu). */
+
+.main { width: 100%; max-width: 1380px; min-width: 0; padding: 30px clamp(18px, 3vw, 44px) 72px; }
+.view { display: none; }
+.view.on { display: block; animation: rise .25s ease both; }
+
+/* ================================================================ nadpisy stránek */
+.page-head { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 14px 24px; margin-bottom: 20px; }
+.page-head > div:first-child { min-width: 0; flex: 1 1 420px; }
+.page-head h1 { font-size: clamp(28px, 3.2vw, 36px); line-height: 1.05; margin: 4px 0 8px; }
+.page-head .lede { max-width: 76ch; color: var(--ink-2); font-size: 14.5px; }
+
+.card { padding: 20px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-1); min-width: 0; }
+.card > * + * { margin-top: 12px; }
+.card > h3 + * { margin-top: 8px; }
+.card h3 { display: flex; align-items: center; gap: 8px; font-size: 19px; line-height: 1.2; }
+.card h3 .icon { width: 20px; height: 20px; color: var(--acc); }
+.card-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.card-head h2 { font-size: 26px; line-height: 1.1; margin-top: 2px; }
+div.stack { display: grid; gap: 16px; align-content: start; min-width: 0; }
+div.stack > * + * { margin-top: 0; }
+
+.row { display: flex; flex-wrap: wrap; align-items: center; }
+.row.gap { gap: 8px 10px; }
+.row.end { justify-content: flex-end; }
+.crit { color: var(--crit); }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+
+.empty { padding: 30px 16px; text-align: center; color: var(--ink-2); }
+.empty strong { display: block; margin-bottom: 4px; font: 600 19px/1.2 var(--disp); color: var(--ink); }
+.empty p { font-size: 14px; }
+
+.tag { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--surface-3); color: var(--ink-2); font: 600 11.5px/1.5 var(--body); white-space: nowrap; }
+.tag.wk { background: var(--wknd-soft); color: var(--wknd); font-family: var(--mono); }
+.tag.acc { background: var(--acc-soft); color: var(--acc); }
+
+.note + .note, .note + .card, .card + .note { margin-top: 10px; }
+.note .link { margin-left: 4px; }
+
+/* Přepínač místo zaškrtávátka */
+
+/* Úkoly a ukázková data */
+
+/* Dlaždice s čísly */
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 18px; }
+.stat { --tone: var(--line-2); position: relative; padding: 14px 16px 13px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); box-shadow: var(--shadow-1); overflow: hidden; }
+.stat::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: var(--tone); }
+.stat.tab { --tone: var(--tab); }
+.stat.good { --tone: var(--good); }
+.stat.crit { --tone: var(--crit); }
+.stat.warn { --tone: var(--warn); }
+.stat .k { display: flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+.stat .k .icon { width: 16px; height: 16px; }
+.stat.tab .k .icon { color: var(--tab); }
+.stat .v { margin: 4px 0 2px; font: 700 30px/1.1 var(--disp); letter-spacing: .01em; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.stat.tab .v { color: var(--tab); }
+.stat.good .v { color: var(--good); }
+.stat.crit .v { color: var(--crit); }
+.stat.warn .v { color: var(--warn); }
+.stat .n { font-size: 12.5px; color: var(--ink-3); overflow-wrap: anywhere; }
+
+/* Nástroje nad tabulkou */
+
+/* ================================================================ tabulky */
+.table-card { border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-1); overflow-x: auto; container-type: inline-size; }
+.table-card table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+.table-card th { padding: 11px 9px; border-bottom: 1px solid var(--line); background: var(--surface-2); color: var(--ink-3); font: 600 12px/1.2 var(--disp); letter-spacing: .08em; text-transform: uppercase; text-align: left; white-space: nowrap; }
+.table-card th:first-child { border-top-left-radius: 17px; }
+.table-card th:last-child { border-top-right-radius: 17px; }
+.table-card td { padding: 10px 9px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.table-card tbody tr:last-child td { border-bottom: 0; }
+.r, .table-card th.r { text-align: right; }
+.c, .table-card th.c { text-align: center; }
+.table-card th:first-child, .table-card td:first-child { padding-left: 14px; }
+.table-card th:last-child, .table-card td:last-child { padding-right: 14px; }
+.table-card td.name b { white-space: nowrap; }
+td.wrap { min-width: 150px; overflow-wrap: anywhere; }
+td.num, td .num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* Rozpad v řádku přehledu */
+dl.kv { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 5px 0; margin: 0; font-size: 14px; }
+dl.kv dt { color: var(--ink-2); }
+dl.kv dd { margin: 0; padding-left: 16px; text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; }
+dl.kv dd.text { max-width: 22ch; font-family: var(--body); overflow-wrap: anywhere; }
+dl.kv dt.sub { padding-left: 14px; font-size: 13px; color: var(--ink-3); }
+dl.kv dt.sub + dd { font-size: 13px; color: var(--ink-3); }
+
+/* Kalendář měsíce */
+.cell { display: grid; place-items: center; height: 26px; border: 1px solid transparent; border-radius: 6px; font: 500 10.5px/1 var(--mono); }
+.cell.full { background: var(--acc); color: var(--acc-ink); }
+.cell.wk { background: var(--wknd); color: var(--surface); }
+.cell.abs { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
+.cell.miss { background: var(--crit-soft); color: var(--crit); }
+
+/* ================================================================ seznam a detail */
+.split { display: grid; grid-template-columns: minmax(270px, 350px) minmax(0, 1fr); gap: 18px; align-items: start; }
+/* Lidé (2.23): filtry nad seznamem a celá šířka velkého monitoru */
+@media (min-width: 1101px) {
+  .main:has(> #view-lide.on) { max-width: 2400px; }
+}
+.list { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); box-shadow: var(--shadow-1); }
+.list .empty { padding: 20px 10px; }
+/* Vedoucí s mnoha odděleními: seznam oddělení na dva řádky, seznam lidí se neroztáhne (2.15). */
+
+/* ================================================================ sankce */
+
+/* ================================================================ pozice */
+/* Navýšení platu u úrovně a podmínky v % */
+/* přehled má hodně sloupců: užší okraje buněk a ukazatele tabáků, ať se vejde i sloupec Plat */
+
+/* ================================================================ importy */
+.drop { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 18px; padding: 22px 24px; border: 2px dashed var(--line-2); border-radius: 20px; background: var(--surface); transition: border-color .15s ease, background .15s ease; }
+
+/* ================================================================ nastavení */
+.action { display: grid; gap: 2px; width: 100%; padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: var(--surface); text-align: left; transition: border-color .15s ease, background .15s ease; }
+.action:hover { border-color: var(--acc-line); background: var(--acc-soft); }
+.action b { font-weight: 600; }
+.action small { color: var(--ink-2); font-size: 13px; }
+.version { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; }
+.version small { display: block; color: var(--ink-3); font-size: 12.5px; }
+.version:first-child { border-color: var(--acc-line); background: var(--acc-soft); }
+
+/* ================================================================ dialog */
+.btn.btn-danger { background: var(--crit); color: #fff; }
+.btn.btn-danger:hover { background: color-mix(in srgb, var(--crit) 85%, #000); }
+dialog.dlg { width: min(calc(100vw - 24px), 470px); max-height: calc(100dvh - 24px); padding: 0; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); color: var(--ink); box-shadow: var(--shadow-3); }
+dialog.dlg.wide { width: min(calc(100vw - 24px), 640px); }
+dialog.dlg[open] { animation: rise .2s ease both; }
+dialog.dlg::backdrop { background: rgba(8, 14, 12, .5); backdrop-filter: blur(3px); }
+.dlg form { display: grid; gap: 14px; padding: 22px 22px 18px; }
+.dlg h2 { font-size: 23px; line-height: 1.15; }
+.dlg-body { display: grid; gap: 12px; max-height: calc(100dvh - 190px); overflow: auto; }
+.dlg-body:empty { display: none; }
+.dlg-body .card-preview { margin: 0; }
+.dlg-body .pin-block { max-width: 320px; width: 100%; justify-self: center; }
+.dlg-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+label.btn { cursor: pointer; }
+
+/* ================================================================ historie změn */
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { min-height: 32px; padding: 5px 12px; border: 1px solid var(--line-2); border-radius: 999px; background: var(--surface); color: var(--ink-2); font: 500 13px/1.2 var(--body); transition: background .15s ease, border-color .15s ease, color .15s ease; }
+.chip:hover { border-color: var(--acc-line); color: var(--ink); }
+.chip.on { background: var(--acc); border-color: var(--acc); color: var(--acc-ink); }
+.dlg-body .log-list { max-height: min(60vh, 560px); overflow: auto; padding-right: 4px; }
+
+/* ================================================================ matice dovedností */
+
+/* ================================================================ profil */
+.table-card.flat { border: 0; border-radius: 0; box-shadow: none; }
+
+/* ================================================================ mobil */
+
+@media screen and (max-width: 900px) {
+  html { scroll-padding-top: 70px; scroll-padding-bottom: calc(96px + env(safe-area-inset-bottom)); }
+  body { -webkit-tap-highlight-color: transparent; }
+  button, .btn, select, summary, label, .chip { touch-action: manipulation; }
+  /* Horní lišta: logo, hodnocené období, uložení, historie změn a zámek. */
+
+  /* Postranní menu na telefonu není: hlavní menu a plovoucí tlačítko vpravo dole (2.15). */
+  .nav { display: none; }
+  .main { padding: 16px max(16px, env(safe-area-inset-right)) calc(104px + env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  .toast { bottom: calc(92px + env(safe-area-inset-bottom)); }
+
+  .split { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media screen and (max-width: 760px) {
+  .page-head { margin-bottom: 16px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .stat { padding: 12px 13px 11px; border-radius: 14px; }
+  .stat .v { font-size: 25px; }
+  .card { padding: 16px; border-radius: 16px; }
+  .drop { grid-template-columns: minmax(0, 1fr); justify-items: center; padding: 20px 16px; text-align: center; }
+
+  /* Tabulky se na telefonu skládají do karet; popisky dává data-label. */
+  .table-card { overflow: visible; border-radius: 16px; }
+  .chip { flex: none; }
+  table.stack, table.stack tbody, table.stack tr, table.stack td { display: block; }
+  table.stack thead { display: none; }   /* oddíl protokolu Servisu (2.26) */
+  table.stack tbody tr { padding: 12px 14px; border-bottom: 1px solid var(--line); }
+  table.stack tbody tr:last-child { border-bottom: 0; }
+  /* Popisek vlevo, hodnota (i z více částí, třeba „8 / 8“) pohromadě vpravo. */
+  table.stack td { display: flex; align-items: center; justify-content: flex-end; gap: 6px; min-height: 30px; padding: 3px 0; border: 0; text-align: right; }
+  table.stack td:last-child { padding-right: 0; }
+  table.stack td[data-label]::before { content: attr(data-label); flex: none; margin-right: auto; padding-right: 12px; color: var(--ink-3); font-size: 12.5px; font-weight: 500; text-align: left; }
+  table.stack td.name { display: block; padding-bottom: 6px; text-align: left; font-size: 15.5px; }
+  table.stack td.name::before { display: none; }
+  table.stack td.wrap { min-width: 0; }
+  table.stack td:not([data-label]) { display: block; text-align: left; }
+  .table-card { container-type: normal; }
+  dialog.dlg { border-radius: 20px; }
+  .dlg form { padding: 18px 16px 14px; }
+}
+
+@media screen and (max-width: 420px) {
+  .stat .v { font-size: 22px; }
+}
+
+@keyframes pulse { 50% { opacity: .35; } }
+
+/* ================================================================ tisk přehledu */
+@media print {
+  body:not(.print-card) { background: #fff; color: #000; font-size: 11px; }
+   body:not(.print-card) .noprint, body:not(.print-card) .toast { display: none !important; }
+  body:not(.print-card) .main { max-width: none; padding: 0; }
+  body:not(.print-card) .view.on { animation: none; }
+  body:not(.print-card) .stats { grid-template-columns: repeat(6, 1fr); gap: 6px; }
+  body:not(.print-card) .stat, body:not(.print-card) .table-card { box-shadow: none; border-color: #bbb; }
+  body:not(.print-card) .stat .v { font-size: 18px; }
+  body:not(.print-card) .table-card { overflow: visible; }
+  body:not(.print-card) .table-card th, body:not(.print-card) .table-card td { padding: 5px 6px; }
+  body:not(.print-card) tr { break-inside: avoid; }
+  body:not(.print-card) * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  /* matice a profil */
+   body:not(.print-card) .card { box-shadow: none; border-color: #bbb; break-inside: avoid; }
+}
+@page { size: A4 landscape; }
+
+/* ---------- Top 5 nejméně efektivních položek (verze 2.2) ---------- */
+/* ruční zápis týdne */
+
+/* ---------- Kontroly: nutné úkony a namátkové kontroly (verze 2.3) ---------- */
+.tag.warn { background: var(--warn-soft); color: var(--warn); }
+
+/* ---------- Matice dovedností: skupiny, dovednosti, prémie, hodnocení a kapacita (verze 2.4) ---------- */
+/* nepovinná dovednost (2.25) */
+/* v zaškolování (2.23): zvlášť pod počtem schopných, neutrální barvou (barva rizika patří schopným) */
+/* plán a skutečnost podle docházky (2.24) */
+/* celkové skóre a nepovinné dovednosti (2.25) */
+/* celkové skóre skupiny: řádek zkušení pracovníci (barva rizika) a pod ním pracovníci v zácviku */
+/* jen celkové skóre: dvojice řádků za skupinu */
+
+/* Volba verze PDF (Top 5) */
+
+/* Sankce: posuvník srážky a srážka ze mzdy (verze 2.4) */
+
+/* Top 5: přeformulování příčiny (✦, verze 2.5) */
+@keyframes ai-pulse { 50% { transform: scale(.8); opacity: .55; } }
+
+/* Vedoucí pracovníci (2.7): oddělení u člověka, pás nad maticí */
+
+/* Kapacita směn po týdnech (2.8): skupiny 1 a 2 se střídají po týdnu */
+
+/* Plánovaná kapacita skupiny (2.9) */
+
+/* Dovednosti vedoucích (2.10): matice vedoucích a společný seznam dovedností */
+/* šířka podle obsahu: bez container-type (inline-size by kartu smrskl na nulu) */
+
+/* Matice po odděleních (2.10.1): každé oddělení vlastní karta pod sebou, sloupce zarovnané */
+
+/* Varianty prémie (2.11): zaškrtávané podmínky a vybrané dovednosti s úrovní */
+
+/* Srážky ze mzdy za neproduktivitu (2.12): pásma u skupiny a karta u člověka */
+
+/* Skener kartičky zaměstnance v Sankcích (2.13) */
+.field > label { font-size: 13px; font-weight: 500; color: var(--ink-2); }
+
+/* ================================================================ telefon jako aplikace (2.14) */
+@keyframes sheet-up { from { transform: translateY(48px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+@media screen and (max-width: 900px) {
+  /* Nadpis stránky: menší, úvodní text na dva řádky (klepnutím se rozbalí). */
+  .page-head { gap: 12px; margin-bottom: 14px; }
+  .page-head > div:first-child { flex-basis: 100%; }
+  .page-head h1 { font-size: 27px; margin: 2px 0 6px; }
+  .page-head .lede { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 14px; cursor: pointer; }
+  .page-head .lede.open { display: block; -webkit-line-clamp: unset; cursor: default; }
+
+  /* Záložky v řádku s vodorovným posunem místo zalamování. */
+
+  /* Přehled: vyhledávání a tlačítko Filtry, zbytek filtrů až po rozbalení. */
+
+  /* Pruh s ukázkovými daty jen v Přehledu; detail člověka bez záhlaví seznamu (zpět vede tlačítko i gesto). */
+
+  /* Větší plochy pro prst. */
+  .btn.small { min-height: 38px; }
+  .icon-btn { width: 40px; height: 40px; }
+
+  /* Dialogy vysunuté zespodu přes celou šířku, tlačítka na celou šířku dole. */
+  dialog.dlg, dialog.dlg.wide { width: 100%; max-width: 100%; margin: auto 0 0; max-height: calc(100dvh - max(12px, env(safe-area-inset-top))); border: 0; border-top: 1px solid var(--line); border-radius: 24px 24px 0 0; }
+  dialog.dlg[open] { animation: sheet-up .28s cubic-bezier(.2, .8, .2, 1) both; }
+  .dlg form { gap: 12px; padding: 10px max(16px, env(safe-area-inset-right)) max(14px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); }
+  .dlg form::before { content: ""; justify-self: center; width: 40px; height: 5px; border-radius: 3px; background: var(--line-2); }
+  .dlg h2 { font-size: 21px; }
+  .dlg-body { max-height: calc(100dvh - 200px); overscroll-behavior: contain; }
+  .dlg-actions { flex-wrap: nowrap; }
+  .dlg-actions .btn:not([hidden]) { flex: 1 1 0; min-height: 46px; justify-content: center; }
+}
+
+/* iPhone zvětšuje stránku při psaní do polí s písmem menším než 16 px. */
+@supports (-webkit-touch-callout: none) {
+  @media screen and (max-width: 900px) {
+    input[type="text"], input:not([type]), input[type="search"], select, textarea { font-size: 16px; }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  dialog.dlg[open] { animation: none; }
+}
+
+/* ================================================================ HALA 2 na telefonu (2.15) */
+/* Úvodní animace po přihlášení: medaile se nakreslí, HALA 2 vyjede, pak se otevře hlavní menu. */
+@keyframes draw { to { stroke-dashoffset: 0; } }
+@keyframes star-fill { to { fill: rgba(242, 196, 109, .9); } }
+@keyframes letter { to { opacity: 1; transform: none; filter: none; } }
+@keyframes two { 0% { opacity: 0; transform: scale(.3) rotate(-14deg); } 100% { opacity: 1; transform: none; } }
+@keyframes line { to { width: 190px; } }
+@keyframes fade-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes ring-in { from { opacity: 0; transform: scale(.55) rotate(-8deg); } to { opacity: 1; transform: none; } }
+@keyframes splash-sweep { from { opacity: 0; transform: rotate(-40deg); } 35% { opacity: 1; } to { opacity: 0; transform: rotate(220deg); } }
+@keyframes splash-out { to { opacity: 0; transform: scale(1.08); filter: blur(8px); } }
+
+/* Hlavní menu: obsazenost dne, volba směny, menu částí. */
+@keyframes hh-live { 70% { box-shadow: 0 0 0 7px rgba(124, 224, 163, 0); } 100% { box-shadow: 0 0 0 0 rgba(124, 224, 163, 0); } }
+@keyframes hint-pulse { 50% { transform: scale(1.7); opacity: .35; } }
+@keyframes hero-shine { 0%, 70% { left: -40%; } 100% { left: 120%; } }
+@keyframes menu-unfold { from { clip-path: inset(0 0 100% 0 round 20px); } to { clip-path: inset(0 0 0 0 round 20px); } }
+@keyframes tile-in { from { opacity: 0; transform: translateY(20px) scale(.86); } to { opacity: 1; transform: none; } }
+@keyframes rise-in { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes hero-in { from { opacity: 0; transform: translateY(26px) scale(.94); } to { opacity: 1; transform: none; } }
+
+/* Vyhledání člověka. */
+
+/* Rychlá kontrola (2.39): počet lidí, filtry, vylosovaný seznam jmen, dnešní kontroly. */
+@keyframes qk-in { from { opacity: 0; transform: translateY(14px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes qk-swap { 0% { background: var(--acc-soft); } 100% { background: transparent; } }
+@keyframes qk-roll { 50% { transform: rotate(-25deg) scale(1.15); } }
+
+@media screen and (max-width: 900px) {
+  /* Plovoucí tlačítko vpravo dole a rychlé volby (Vyhledat člověka, Sankce, Top 5, Kontroly). */
+  /* tři čárky, které se při otevření složí do křížku */
+
+  /* Na hlavním menu nejsou pruhy z jiných částí; srážky jsou jako štítek v obsazenosti. */
+
+  /* Vyhledání člověka přes celou výšku. */
+  dialog.dlg.tall { height: calc(100dvh - max(12px, env(safe-area-inset-top))); }
+  dialog.dlg.tall form { height: 100%; grid-template-rows: auto auto minmax(0, 1fr) auto; }
+  dialog.dlg.tall .dlg-body { align-content: start; max-height: none; min-height: 0; }
+}
+
+/* ================================================================ Protokoly (2.16) */
+
+/* ================================================================ Audit (lidé v práci a kusy, 2.17) */
+/* Výpadek lidí a dorovnání (2.18) */
+
+/* detail dne */
+table.wa-prev { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.wa-prev th, table.wa-prev td { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+table.wa-prev th { color: var(--ink-3); font: 600 11px/1.2 var(--disp); letter-spacing: .08em; text-transform: uppercase; }
+table.wa-prev .r { text-align: right; }
+
+/* Výrobní plán (2.18) */
+
+/* ---------- Servis: odeslání zařízení na servis (2.21) ---------- */
+.tag.ok { background: var(--good-soft); color: var(--good); }
+.tag.crit { background: var(--crit-soft); color: var(--crit); }
+.sv-actions { justify-content: flex-end; align-items: center; }
+/* oddíly protokolu Na opravu / K vyřazení a tři PDF (2.26) */
+/* digitální podpis předávajícího (2.26): plocha je vždy bílá jako papír */
+/* duplicity (2.22.1): jen barva, rozložení se nemění (označuje se už při psaní) */
+@media (max-width: 900px) {
+  .sv-actions { justify-content: flex-start; }
+}
+
+/* ---------- Shortage: chybějící díly z Excelu (2.27, TOP a kód z odkazu 2.27.1, úpravy položek 2.28) ---------- */
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.sh-paste { display: flex; align-items: center; gap: 14px; margin: 0 0 14px; padding: 12px 14px; border: 1.5px dashed var(--line-2); border-radius: 16px; background: var(--surface); color: var(--ink-2); font-size: 14px; cursor: text; }
+.sh-paste:focus-within { border-color: var(--acc); background: var(--acc-soft); }
+/* Doplnit chybějící (2.36): pruh nad polem pro vložení a zvýrazněné pole */
+.sh-mergebar { display: flex; align-items: center; gap: 14px; margin: 0 0 8px; padding: 10px 14px; border-radius: 14px; background: var(--acc-soft); border: 1px solid var(--acc-line); color: var(--ink); font-size: 14px; }
+.sh-mergebar > div { flex: 1 1 auto; }
+.sh-mergebar[hidden] { display: none; }
+.sh-paste.merge { border-color: var(--acc); border-style: solid; }
+.btn.sec.on[data-shmerge] { background: var(--acc-soft); border-color: var(--acc); color: var(--acc-2); }
+.sh-mgone { margin: 12px 0 0; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+@media (max-width: 640px) { .sh-mergebar { flex-direction: column; align-items: stretch; } }
+.sh-paste span { flex: 1 1 auto; }
+.sh-paste b { color: var(--ink); }
+.sh-paste textarea { flex: 0 0 240px; min-height: 40px; height: 40px; resize: none; overflow: hidden; }
+.sh-msg:empty { display: none; }
+.sh-msg { display: grid; gap: 8px; margin-bottom: 14px; }
+.sh-msg .note + .note { margin-top: 0; }
+.sh-card .card-head { align-items: flex-start; }
+.sh-search input { width: 240px; max-width: 100%; }
+table.sh-tab td { vertical-align: top; }
+/* dlouhé nadpisy sloupců se zalomí, aby se tabulka i s tlačítky vešla na monitor 1440 px */
+table.sh-tab th { white-space: normal; vertical-align: bottom; }
+/* skryté popisky (.sr-only) v hlavičce jsou absolutní: bez toho by utekly z posuvné tabulky a stránka by přetekla */
+.sh-card .table-card { position: relative; }
+table.sh-tab .sh-ean { margin-top: 3px; font-family: var(--mono); font-size: 12.5px; color: var(--ink-2); white-space: nowrap; }
+table.sh-tab .sh-ean a { color: var(--acc); text-decoration: underline; text-underline-offset: 2px; }
+/* přesouvání položek (2.28): myší kdekoli na řádku, dotykem za úchyt */
+table.sh-tab th.sh-gripc, table.sh-tab td.sh-gripc { width: 30px; padding-left: 4px; padding-right: 0; }
+.sh-grip { display: grid; place-items: center; width: 26px; height: 30px; padding: 0; border: 0; border-radius: 8px; background: transparent; color: var(--ink-3); cursor: grab; touch-action: none; }
+.sh-grip:hover, .sh-grip:focus-visible { background: var(--surface-3); color: var(--ink); }
+.sh-grip .icon { width: 16px; height: 16px; }
+@media (pointer: fine) { table.sh-tab:not(.sh-nodrag) tbody tr { cursor: grab; user-select: none; } }
+table.sh-tab tbody tr input { cursor: text; user-select: text; }
+table.sh-tab.sh-nodrag .sh-grip { visibility: hidden; }
+body.sh-drag, body.sh-drag * { cursor: grabbing !important; user-select: none !important; }
+table.sh-tab tr.sh-dragging td { opacity: .45; background: var(--acc-soft); }
+table.sh-tab tr.sh-drop-before td { box-shadow: inset 0 3px 0 var(--acc); }
+table.sh-tab tr.sh-drop-after td { box-shadow: inset 0 -3px 0 var(--acc); }
+table.sh-tab td.sh-opc { min-width: 130px; }
+.sh-rec { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; font-size: 13px; }
+.tag.sh-state { background: var(--surface-3); color: var(--ink); font-weight: 700; white-space: normal; overflow-wrap: anywhere; max-width: 100%; text-align: left; border-radius: 8px; }
+table.sh-tab td.sh-notec { min-width: 150px; }
+.sh-note { width: 100%; min-width: 130px; min-height: 34px; padding: 6px 9px; font-size: 13.5px; }
+table.sh-tab td.sh-actc, table.sh-tab th.sh-actc { width: 96px; text-align: right; }
+.sh-hint { margin: -4px 0 10px; }
+/* poddíly z výrobního plánu (2.29) */
+.sh-planinfo { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 12px; color: var(--ink-2); }
+table.sh-tab tr.sh-hassub td { border-bottom-color: transparent; }
+table.sh-tab tr.sh-sub td { padding-top: 6px; padding-bottom: 6px; background: var(--surface-2); font-size: 13.5px; }
+table.sh-tab tr.sh-sub.sh-top td { background: color-mix(in srgb, var(--crit-soft) 45%, var(--surface-2)); }
+table.sh-tab tr.sh-sub td.sh-subord { color: var(--ink-3); font-weight: 500; }
+.sh-subarrow { display: inline-block; width: 10px; height: 9px; margin: 0 6px 2px 2px; border-left: 1.5px solid var(--ink-3); border-bottom: 1.5px solid var(--ink-3); vertical-align: middle; }
+.tag.sh-subtag { background: var(--surface-3); color: var(--ink); font-weight: 800; letter-spacing: .04em; }
+.tag.sh-rectag { background: var(--acc-soft); color: var(--acc); }
+/* skryté v PDF (2.29.1): v aplikaci zašedlé, tlačítko zůstává */
+table.sh-tab tr.sh-pdfoff td:not(.sh-actc):not(.sh-gripc) { opacity: .45; }
+table.sh-tab td.sh-actc { white-space: nowrap; }
+.sh-hidebtn.on { background: var(--warn-soft); color: var(--warn); }
+/* ruční TOP SHORTAGE, plné zobrazení sestavy a filtr probíhajících operací (2.31) */
+.btn.small.sh-topbtn { min-height: 30px; padding: 3px 8px; margin-right: 2px; font-size: 11.5px; font-weight: 800; letter-spacing: .04em; vertical-align: middle; }
+.btn.sh-topbtn.on { background: var(--crit); border-color: var(--crit); color: var(--surface); }
+.sh-fullc { margin-top: 6px; }
+.btn.small.sh-fullbtn { min-height: 28px; padding: 3px 9px; font-size: 12px; white-space: nowrap; }
+.btn.sh-fullbtn.on { background: var(--acc-soft); border-color: var(--acc); color: var(--acc); }
+.sh-ops { display: grid; gap: 6px; margin: 0 0 12px; }
+.sh-ops .chips { flex-wrap: wrap; }
+.sh-ops .sh-opn { margin-left: 4px; font-family: var(--mono); font-size: 11.5px; opacity: .75; }
+.sh-ops p { margin: 0; }
+table.sh-tab td.sh-qty b { font-size: 15px; }
+table.sh-tab tr[hidden] { display: none; }
+table.sh-tab tr.sh-top td { background: color-mix(in srgb, var(--crit-soft) 70%, transparent); }
+table.sh-tab tr.sh-top td:first-child { box-shadow: inset 3px 0 0 var(--crit); }
+table.sh-tab tr.sh-top td:nth-child(2) { color: var(--crit); font-weight: 700; }
+/* TOP 2 (2.32): hned po TOP SHORTAGE, oranžová */
+table.sh-tab tr.sh-top2 td { background: color-mix(in srgb, var(--warn-soft) 65%, transparent); }
+table.sh-tab tr.sh-top2 td:first-child { box-shadow: inset 3px 0 0 var(--warn); }
+table.sh-tab tr.sh-top2 td:nth-child(2) { color: var(--warn); font-weight: 700; }
+table.sh-tab tr.sh-sub.sh-top2 td { background: color-mix(in srgb, var(--warn-soft) 40%, var(--surface-2)); }
+.tag.sh-top2tag { background: var(--warn); color: var(--surface); font-weight: 800; letter-spacing: .03em; margin-right: 4px; }
+.sh-top2note { margin: 2px 0 1px; color: var(--warn); font-size: 12.5px; font-weight: 700; }
+.btn.sh-topbtn.sh-top2btn.on { background: var(--warn); border-color: var(--warn); color: var(--surface); }
+/* akce v řádku: TOP a TOP2 nahoře, oko a × pod nimi (2.32), ať se tabulka vejde na 1440 px */
+.sh-acts { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: center; gap: 4px; max-width: 96px; margin-left: auto; }
+.sh-tiers { display: flex; gap: 4px; }
+.sh-acts .btn.small.sh-topbtn { margin-right: 0; padding: 3px 6px; }
+/* oddělení (2.32): nastavení, nadpisy bloků v tabulce, výběr v řádku */
+.sh-depts { margin-bottom: 16px; }
+.sh-depts > summary { cursor: pointer; list-style-position: inside; font-size: 15px; }
+.sh-depts > summary b { margin-right: 6px; }
+.sh-deptbody { display: grid; gap: 12px; margin-top: 12px; }
+.sh-deptlist { display: grid; gap: 8px; }
+.sh-deptrow { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; }
+.sh-deptrow input { flex: 0 1 260px; min-width: 0; min-height: 36px; }
+.sh-deptnew input { flex-basis: 260px; }
+.sh-optab { display: grid; max-width: 760px; }
+.sh-ophead, .sh-oprow { display: grid; grid-template-columns: minmax(0, 1fr) 90px minmax(160px, 240px); align-items: center; gap: 10px; padding: 6px 10px; border-bottom: 1px solid var(--line); }
+.sh-ophead { color: var(--ink-3); font-size: 12px; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+.sh-optab .num { text-align: right; font-family: var(--mono); }
+.sh-oprow select { min-height: 34px; width: 100%; }
+.sh-oprow.sh-oploose { box-shadow: inset 3px 0 0 var(--warn); }
+@media (max-width: 760px) { .sh-ophead { display: none; } .sh-oprow { grid-template-columns: minmax(0, 1fr) auto; } .sh-oprow select { grid-column: 1 / -1; } }
+table.sh-tab tr.sh-depthead td { padding: 10px 12px 8px; border-top: 2px solid var(--ink); background: var(--surface-3); font-size: 14.5px; }
+table.sh-tab tr.sh-depthead.sh-drop-before td { box-shadow: inset 0 3px 0 var(--acc); }
+.sh-deptpick { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; margin-top: 6px; }
+.sh-deptpick select { min-height: 30px; max-width: 100%; padding: 2px 6px; font-size: 12.5px; }
+.tag.sh-manual { background: var(--acc-soft); color: var(--acc); }
+.tag.sh-toptag { background: var(--crit); color: var(--surface); font-weight: 800; letter-spacing: .03em; margin-right: 4px; }
+table.sh-tab td.sh-ord { white-space: nowrap; font-weight: 600; }
+.tag.sh-code { font-family: var(--mono); white-space: nowrap; }
+.sh-lists { margin-top: 16px; }
+.sh-lists h3 { margin: 0 0 10px; }
+.sh-lists .tiny { margin: 10px 0 0; }
+@media (max-width: 760px) {
+  .sh-search, .sh-search input { width: 100%; }
+  .sh-paste { flex-direction: column; align-items: stretch; gap: 8px; }
+  .sh-paste textarea { flex-basis: auto; width: 100%; }
+  table.sh-tab .sh-ean, table.sh-tab td.sh-ord, .tag.sh-code { white-space: normal; word-break: break-all; }
+  table.sh-tab td.sh-gripc, table.sh-tab td.sh-actc { width: auto; text-align: left; }
+  table.sh-tab td.sh-opc, table.sh-tab td.sh-notec { min-width: 0; }
+  .sh-note { min-width: 0; }
+}
+/* kapacity a zaškolení (2.30, vzhled 2.31): stránky reportu jako vzor uživatele (šířka 1280 px,
+   písma Plex a Plex Mono, barvy vzoru). Papír je bílý i v tmavém režimu, stejně jako PDF. */
+
+/* ===== Audit: Lidé v práci, docházka a výkony z jednoho souboru (2.37) ===== */
+/* koláč dílů v profilu */
+/* Kontroly podle příchodů */
+
+/* ===== Plán kapacit (2.38) ===== */
+
+/* Report docházky (2.40): papír po vzoru, bílý i v tmavém režimu. */
+/* Report docházky (2.41): značka dne a skupiny reportu. */
+
+/* Audit 2.42: skupiny Matice u skupiny Auditu, starší soubory, zdroj od listopadu */
+
+/* Rychlá kontrola 2.42.1: klepnutí na člověka otevře body kontroly */
+/* Nastavení sloupců přes AI (2.42.2) */
+/* Jak se soubor načte (2.42.3) */
+ .dv-prev h4 { margin: 4px 0 6px; }
+.dv-prevh { margin: 14px 0 4px; font-size: 15px; }
+.dv-prev { display: grid; gap: 6px; }
+.dv-prevtab { width: 100%; border-collapse: collapse; font-size: 13px; }
+.dv-prevtab th, .dv-prevtab td { padding: 4px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+.dv-prevtab th { color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.dv-prevtab .r { text-align: right; }
+@media (max-width: 700px) { .dv-prevtab { font-size: 12px; } .dv-prevtab th, .dv-prevtab td { padding: 3px 4px; } }
+.dv-prevwrap { overflow-x: auto; }
+
+/* Konce trestů (2.43) */
+
+/* Úvod HALA 2: rozbalovací rozpad Teď v práci (2.43) */
+
+/* KPI: výkonnost na osobu (2.44) */
+
+/* Konce trestů: lidé, kteří v souboru nejsou (2.44.1) */
+
+/* Vrátit zpět v Posledních změnách (2.45) */
+
+/* ================= ÚKOLY (2.46) ================= */
+ .tag .icon { width: 14px; height: 14px; vertical-align: -2px; margin-right: 3px; }
+.tk-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 520px) {
+  .tk-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ==========================================================================
+   Vzhled „Sklo“ (2.47): jen html[data-look="glass"], původní vzhled nahoře zůstává beze změny.
+   Tokeny (barvy, písmo) jsou v static/lock.css. Papíry reportů (.ctr-paper, .dr-*) zůstávají bílé.
+   ========================================================================== */
+:root[data-look="glass"] .side { background: rgba(20, 22, 28, .62); border-right-color: var(--glass-line); }
+:root[data-look="glass"] .nav button { border-radius: 999px; color: rgba(255, 255, 255, .72); }
+:root[data-look="glass"] .nav button:hover { background: rgba(255, 255, 255, .1); color: #fff; }
+:root[data-look="glass"] .nav button[aria-current="true"] { background: var(--acc-grad); color: #fff; box-shadow: var(--acc-glow); }
+:root[data-look="glass"] .nav button[aria-current="true"]::before { display: none; }
+:root[data-look="glass"] .nav-badge { background: #fff; color: #d94f00; }
+:root[data-look="glass"] .nav button[aria-current="true"] .nav-badge { background: rgba(0, 0, 0, .28); color: #fff; }
+:root[data-look="glass"] .nav-badge.late { background: var(--crit); color: #fff; }
+:root[data-look="glass"] .side-foot { border-top-color: var(--glass-line); }
+:root[data-look="glass"] .icon-btn { border-radius: 999px; }
+:root[data-look="glass"] .icon-btn:hover { background: rgba(255, 255, 255, .12); }
+/* skleněné plochy */
+:root[data-look="glass"] .card,
+:root[data-look="glass"] .table-card,
+:root[data-look="glass"] .stat,
+:root[data-look="glass"] .tile,
+:root[data-look="glass"] .banner,
+:root[data-look="glass"] .tk-row { background: var(--glass); border-color: var(--glass-line); box-shadow: var(--shadow-2); }
+/* Pozor: backdrop-filter dělá z prvku obal pro position: fixed potomky (přetahování v Shortage,
+   plovoucí popisky), proto ho karty a tabulky nemají; za nimi je stejně jen plynulý přechod. */
+:root[data-look="glass"] .card, :root[data-look="glass"] .table-card { border-radius: 24px; }
+:root[data-look="glass"] .stat { border-radius: 20px; background: radial-gradient(circle at 86% 30%, rgba(255, 120, 30, .14) 0%, rgba(255, 255, 255, .04) 62%), rgba(18, 20, 26, .42); }
+:root[data-look="glass"] .stat::before { height: 2px; opacity: .9; }
+:root[data-look="glass"] .stat .v { letter-spacing: -.02em; }
+:root[data-look="glass"] .tile:hover, :root[data-look="glass"] .tk-row:hover { background: linear-gradient(135deg, rgba(255, 255, 255, .13) 0%, rgba(26, 28, 34, .55) 60%); border-color: rgba(255, 255, 255, .26); transform: translateY(-1px); }
+:root[data-look="glass"] .banner { border-radius: 20px; }
+:root[data-look="glass"] .chip { background: var(--glass-soft); border-color: var(--glass-line); color: var(--ink-2); }
+:root[data-look="glass"] .chip:hover { background: rgba(255, 255, 255, .12); color: #fff; border-color: rgba(255, 255, 255, .28); }
+:root[data-look="glass"] .chip.on { background: var(--acc-grad); border-color: transparent; color: #fff; box-shadow: var(--acc-glow); }
+:root[data-look="glass"] .seg { background: rgba(255, 255, 255, .05); border-color: var(--glass-line); border-radius: 999px; }
+:root[data-look="glass"] .seg button { border-radius: 999px; }
+:root[data-look="glass"] .seg button.on { background: var(--acc-grad); color: #fff; box-shadow: var(--acc-glow); }
+:root[data-look="glass"] .tag.acc { background: var(--acc-soft); color: var(--acc-2); }
+/* tabulky: hlavička a řádky průhledně, lepivé buňky tmavě (jinak by prosvítal obsah pod nimi) */
+:root[data-look="glass"] thead th { background: rgba(14, 15, 20, .72); color: var(--ink-2); }
+:root[data-look="glass"] tbody tr:hover > td { background-color: rgba(255, 255, 255, .04); }
+/* dialogy a plovoucí okna */
+:root[data-look="glass"] dialog.dlg { background: linear-gradient(135deg, rgba(40, 42, 50, .9) 0%, rgba(20, 22, 28, .94) 100%); border-color: var(--glass-line); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); border-radius: 26px; }
+:root[data-look="glass"] dialog.dlg::backdrop { background: rgba(5, 6, 8, .55); backdrop-filter: blur(6px); }
+:root[data-look="glass"] .toast { background: rgba(30, 32, 40, .92); border: 1px solid var(--glass-line); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); color: #fff; }
+:root[data-look="glass"] .page-head h1 { text-shadow: 0 2px 10px rgba(0, 0, 0, .4); }
+:root[data-look="glass"] .eyebrow { color: var(--acc-2); }
+/* monitor: boční panel jako plovoucí skleněná deska */
+@media screen and (min-width: 901px) {
+  :root[data-look="glass"] .shell { grid-template-columns: 254px minmax(0, 1fr); }
+  :root[data-look="glass"] .main { padding-left: clamp(18px, 2vw, 30px); padding-right: clamp(18px, 2vw, 30px); }
+  :root[data-look="glass"] .side { background: rgba(255, 255, 255, .055); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur); }
+  :root[data-look="glass"] .side { top: 14px; height: calc(100vh - 28px); height: calc(100dvh - 28px); margin: 14px 0 14px 14px; border: 1px solid var(--glass-line); border-radius: 30px;
+    box-shadow: 0 24px 50px -8px rgba(0, 0, 0, .5), inset 0 1.5px 2px rgba(255, 255, 255, .28), inset 0 0 12px rgba(255, 255, 255, .04); }
+  :root[data-look="glass"] .period-box { background: var(--glass-soft); border-color: var(--glass-line); }
+  :root[data-look="glass"] .side { gap: 14px; padding-top: 16px; }
+  :root[data-look="glass"] .nav { gap: 2px; }
+  :root[data-look="glass"] .nav button { min-height: 39px; padding-top: 8px; padding-bottom: 8px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  :root[data-look="glass"] .card, :root[data-look="glass"] .table-card, :root[data-look="glass"] .stat, :root[data-look="glass"] .tile, :root[data-look="glass"] .side, :root[data-look="glass"] dialog.dlg { -webkit-backdrop-filter: none; backdrop-filter: none; background: var(--surface); }
+}
+/* telefon: úvod HALA 2, Rychlá kontrola, plovoucí tlačítko a úvodní animace v barvách skla */
+:root[data-look="glass"] .splash { background: radial-gradient(110% 70% at 50% 30%, #ff7a22 0%, #b13c00 42%, #1a0c05 100%); }
+:root[data-look="glass"] .home-hero, :root[data-look="glass"] .qk-hero {
+  background: radial-gradient(90% 80% at 85% 10%, rgba(255, 140, 60, .55), transparent 60%), radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, .12), transparent 55%), linear-gradient(155deg, rgba(60, 34, 20, .92) 0%, rgba(30, 22, 20, .9) 55%, rgba(16, 15, 18, .94) 100%);
+  border: 1px solid rgba(255, 255, 255, .16); box-shadow: 0 26px 50px -24px rgba(0, 0, 0, .9), inset 0 1.5px 2px rgba(255, 255, 255, .25); }
+:root[data-look="glass"] .home .seg-pill, :root[data-look="glass"] .qk-pill { background: var(--acc-grad); box-shadow: var(--acc-glow); }
+:root[data-look="glass"] .qk-go { background: var(--acc-grad); box-shadow: 0 18px 32px -16px rgba(226, 79, 0, .8), inset 0 1px 0 rgba(255, 255, 255, .3); }
+@media screen and (max-width: 900px) {
+  :root[data-look="glass"] .fab { background: var(--acc-grad); box-shadow: 0 16px 30px -12px rgba(226, 79, 0, .7), inset 0 1px 0 rgba(255, 255, 255, .3); }
+  :root[data-look="glass"] .fab .nav-dot { box-shadow: 0 0 0 2px #d94f00; }
+}
+/* papíry reportů podle vzoru (Kapacity a zaškolení, Report docházky) mají dál písma Plex */
+:root[data-look="glass"] .ctr-paper, :root[data-look="glass"] .dr-paper { --body: "Plex", "Segoe UI", system-ui, -apple-system, Arial, sans-serif; --disp: "Barlow SC", "Segoe UI Semibold", system-ui, sans-serif; font-family: var(--body); }
+
+/* Kontrola jmen v docházce (2.48) */
+
+/* KPI: odpracované dny přepočtené na směnu (2.49) */
+
+/* Docházka: barvy směn (2.50). Ranní modře, odpolední zeleně, přesčas o víkendu / ve svátek
+   zůstává fialový (.cell.wk), část směny světlejší s rámečkem. */
+.cell.full.sh-am { background: var(--pie-1); color: #fff; }
+.cell.full.sh-pm { background: var(--pie-3); color: #fff; }
+
+/* Docházka (2.51): ruční úprava dne (tečka v rohu), uzamčený den, zámky nad dny */
+button.cell { margin: 0; padding: 0; font: 500 10.5px/1 var(--mono); cursor: pointer; position: relative; }
+button.cell:hover { outline: 2px solid var(--acc-line); outline-offset: 1px; }
+button.cell:focus-visible { outline: 2px solid var(--acc); outline-offset: 1px; }
+.cell.ed::after { content: ""; position: absolute; top: 2px; right: 2px; width: 5px; height: 5px; border-radius: 50%; background: var(--crit); box-shadow: 0 0 0 1px var(--surface); }
+
+/* Širší monitory (2.51): datové pohledy využijí šířku až 2400 px, ostatní až 1920 px */
+@media (min-width: 1101px) {
+  .main { max-width: 1920px; }
+  .main:has(> #view-dochazka.on), .main:has(> #view-prehled.on), .main:has(> #view-matice.on), .main:has(> #view-audit.on),
+  .main:has(> #view-shortage.on), .main:has(> #view-konce.on), .main:has(> #view-ukoly.on), .main:has(> #view-sankce.on),
+  .main:has(> #view-vyroba.on), .main:has(> #view-kontroly.on), .main:has(> #view-plankap.on) { max-width: 2400px; }
+}
+
+/* Požadavky pracovníka (2.51) */
+
+/* Zkušební doba (2.52): ikona přesýpacích hodin u jména */
+
+/* Servis (2.53): uzamčený protokol sbalený na jeden řádek */
+
+/* Plovoucí menu (2.53): Hlavní stránka, rychlé volby a Ostatní s posuvným seznamem přímo v menu */
+
+/* ==========================================================================
+   Doladění skla (2.54)
+   1. Oranžová jen pro hlavní akci a aktivní položku: malá tlačítka jsou neutrální sklo,
+      zapnutý filtr (čip) jen s oranžovým okrajem, bez záře.
+   2. Docházka: den bez známé směny šedý (oranžová je akcent), ručně upravený den s výraznou
+      tečkou, uzamčený den šrafovaný.
+   3. Kontrast textů (tokeny --ink-2 a --ink-3 v lock.css).
+   4. Větší čísla v kalendáři docházky.
+   5. Teplé podsvícení pozadí je na datových stránkách monitoru tlumené (úvod a telefon beze změny).
+   ========================================================================== */
+:root[data-look="glass"] .btn.small:not(.sec):not(.ghost):not(.danger) { background: rgba(255, 255, 255, .1); border-color: var(--glass-line); color: var(--ink); box-shadow: none; }
+:root[data-look="glass"] .btn.small:not(.sec):not(.ghost):not(.danger):hover { background: rgba(255, 255, 255, .16); filter: none; box-shadow: none; border-color: rgba(255, 255, 255, .3); }
+:root[data-look="glass"] .chip.on { background: var(--acc-soft); border-color: var(--acc-line); color: #fff; box-shadow: none; }
+:root[data-look="glass"] .chip.on .t5-count:not(.late), :root[data-look="glass"] .chip.on .num { color: #fff; }
+
+:root[data-look="glass"] .cell.full:not(.sh-am):not(.sh-pm) { background: #5b6170; color: #fff; }
+:root[data-look="glass"] .cell.part:not(.sh-am):not(.sh-pm) { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .28); color: var(--ink); }
+:root[data-look="glass"] .note.i { background: rgba(255, 255, 255, .06); border-color: var(--glass-line); }
+.cell.ed::after { top: 1px; right: 1px; width: 7px; height: 7px; background: #ff3b30; box-shadow: 0 0 0 1.5px #fff; }
+:root .cell.cell.lk { background-image: repeating-linear-gradient(135deg, rgba(0, 0, 0, .34) 0 3px, transparent 3px 6px); box-shadow: inset 0 0 0 1.5px rgba(255, 255, 255, .55); }
+:root[data-look="glass"] .callegend i.cell.ed, :root[data-look="glass"] .callegend i.cell.lk { background-color: #5b6170; }
+
+@media (min-width: 901px) {
+  :root[data-look="glass"] body[data-view]:not([data-view="domu"])::before { opacity: .4; }
+}
+
+/* Hledání člověka v menu na PC (2.56): kolonka pod Hodnoceným obdobím, výsledky přímo pod ní */
+:root[data-look="glass"] .side-q input { background: none; border: 0; }
+
+/* Servis: vyřazeno servisem (2.56) */
+/* s kolonkou hledání se menu na nižším monitoru (výška do 1000 px) zahustí, ať je vidět celé */
+@media screen and (min-width: 901px) and (max-height: 1000px) {
+  :root[data-look="glass"] .nav button, .nav button { min-height: 36px; padding-top: 7px; padding-bottom: 7px; }
+}
+
+/* ==========================================================================
+   Prvky z návrhu dashboardu (2.59): pruh pokroku a trend v dlaždici, barevné pruhy po
+   kategoriích, hladké křivky, souhrn v kapsli, skleněná plocha obsahu, pravý panel
+   a sbalitelné menu. Jen vzhled aplikace; PDF se kreslí bez CSS a nemění se.
+   ========================================================================== */
+/* pruh pokroku a štítek trendu v dlaždici */
+:root[data-look="glass"] .stat-bar { background: rgba(255, 255, 255, .09); }
+:root[data-look="glass"] .stat-bar i { background: var(--acc-grad); box-shadow: 0 0 10px rgba(255, 122, 34, .45); }
+
+/* barevné pruhy po kategoriích */ .co { background: var(--pie-o); }
+
+/* hladké křivky: plocha pod křivkou, při najetí svislá čárkovaná linka a bod */
+:root[data-look="glass"] .chart .hp .xd { stroke: #1c1e25; filter: drop-shadow(0 0 6px var(--series)); }
+:root[data-look="glass"] .chart.ch-smooth .ref { stroke: rgba(255, 255, 255, .28); stroke-dasharray: 4 4; }
+
+/* pravý panel: jen na širokém monitoru */
+@media screen and (min-width: 1600px) {
+  /* 2.64: střed nejvýš do své šířky (--main-max), panel vpravo vezme zbytek, aspoň 312 px */
+  :root .shell, :root[data-look="glass"] .shell { grid-template-columns: 254px minmax(0, var(--main-max, 1920px)) minmax(312px, 1fr); }
+  :root[data-look="glass"] .rail { border-color: var(--glass-line); background: rgba(255, 255, 255, .055); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: 0 24px 50px -8px rgba(0, 0, 0, .5), inset 0 1.5px 2px rgba(255, 255, 255, .28), inset 0 0 12px rgba(255, 255, 255, .04); }
+}
+:root[data-look="glass"] .rail-card { border-color: var(--glass-line); background: linear-gradient(135deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .02)); }
+:root[data-look="glass"] .rail-ic { border-color: var(--glass-line); background: rgba(255, 255, 255, .08); box-shadow: inset 0 1px 1px rgba(255, 255, 255, .2); }
+:root[data-look="glass"] .rail-log { border-top-color: var(--glass-line); }
+
+/* sbalitelné menu: tlačítko jen na monitoru */
+@media screen and (min-width: 901px) {
+  :root.side-mini .side-foot { grid-template-columns: minmax(0, 1fr); }
+  :root.side-mini .side-mini-btn .sm-arr { transform: scaleX(-1); }
+  :root.side-mini .shell, :root.side-mini[data-look="glass"] .shell { grid-template-columns: 84px minmax(0, 1fr); }
+  :root.side-mini .side { padding-left: 10px; padding-right: 10px; align-items: stretch; }
+  :root.side-mini .side-top { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  :root.side-mini .brand-text, :root.side-mini .period-box, :root.side-mini .side-search, :root.side-mini .nav button > span, :root.side-mini .save-state span, :root.side-mini .side-foot .btn > span { display: none; }
+  :root.side-mini .side-quick { flex-direction: column; }
+  :root.side-mini .nav button { justify-content: center; padding-left: 0; padding-right: 0; }
+  :root.side-mini .nav button[aria-current="true"]::before { left: -10px; }
+  :root.side-mini .nav-badge { position: absolute; top: 2px; right: 4px; min-width: 17px; height: 17px; padding: 0 4px; font-size: 10px; line-height: 17px; }
+  :root.side-mini .side-foot { justify-items: center; }
+  :root.side-mini .side-foot .btn { justify-content: center; gap: 0; width: 44px; padding-left: 0; padding-right: 0; font-size: 0; }
+  :root.side-mini .save-state { justify-content: center; }
+}
+@media screen and (min-width: 1600px) {
+  :root.side-mini .shell, :root.side-mini[data-look="glass"] .shell { grid-template-columns: 84px minmax(0, var(--main-max, 1920px)) minmax(312px, 1fr); }
+}
+
+/* souhrn v kapsli a jedna skleněná plocha obsahu (monitor, vzhled Sklo) */
+@media screen and (min-width: 901px) {
+  :root[data-look="glass"] .stats { gap: 0; border: 1px solid var(--glass-line); border-radius: 26px; overflow: hidden; grid-template-columns: repeat(auto-fit, minmax(176px, 1fr));
+    background: radial-gradient(70% 140% at 100% 0%, rgba(255, 122, 34, .12), transparent 60%), linear-gradient(135deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .025));
+    box-shadow: 0 18px 40px -22px rgba(0, 0, 0, .8), inset 0 1px 1px rgba(255, 255, 255, .18); }
+  :root[data-look="glass"] .stats > .stat { margin: -1px 0 0 -1px; padding: 15px 20px 14px; border: 0; border-left: 1px solid var(--glass-line); border-top: 1px solid var(--glass-line); border-radius: 0; background: transparent; box-shadow: none; overflow: visible; }
+  :root[data-look="glass"] .stats > .stat::before { left: 20px; right: auto; top: 0; width: 26px; height: 3px; border-radius: 0 0 3px 3px; }
+  /* okraje: hlavní sloupec a plocha dohromady skoro stejně jako dřív samotný sloupec, ať se široké
+     tabulky (Shortage na 1440 px) vejdou */
+  :root[data-look="glass"] .main { padding-left: 12px; padding-right: 12px; }
+  :root[data-look="glass"] .main > .view.on:not(#view-domu) { padding: 22px 18px 28px; border: 1px solid rgba(255, 255, 255, .1); border-radius: 32px;
+    background: radial-gradient(55% 38% at 100% 0%, rgba(255, 122, 34, .09), transparent 70%), radial-gradient(45% 30% at 0% 100%, rgba(255, 255, 255, .035), transparent 70%), linear-gradient(160deg, rgba(255, 255, 255, .04), rgba(255, 255, 255, .012));
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, .7), inset 0 1px 1px rgba(255, 255, 255, .12); }
+}
+@media screen and (min-width: 1600px) {
+  :root[data-look="glass"] .main > .view.on:not(#view-domu) { padding-left: 26px; padding-right: 26px; }
+}
+@media print {
+  :root[data-look="glass"] .main > .view.on { padding: 0; border: 0; background: none; box-shadow: none; }
+}
+
+/* ---------- Shortage ve třech krocích (2.61) ---------- */
+.sh-steps { list-style: none; margin: 0 0 14px; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.sh-step { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 12px 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--card); }
+.sh-step p { margin: 2px 0 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sh-stepn { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; font-size: 13px; border: 1px solid var(--line); color: var(--ink-2); }
+.sh-step.done .sh-stepn { background: var(--ok, #2e9e6a); border-color: transparent; color: #fff; }
+.sh-mode { margin: 0 0 12px; }
+.sh-colgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px 12px; }
+.sh-colprev td, .sh-colprev th { white-space: nowrap; }
+.sh-ainote { color: var(--warn-ink, var(--ink)); }
+.sh-colsnote .link { margin-left: 4px; }
+.sh-colors { display: grid; gap: 8px; }
+.sh-colorrow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.sh-swatch { width: 34px; height: 24px; border-radius: 6px; border: 1px solid var(--line); }
+.sh-rzlist { display: grid; gap: 10px; }
+.sh-rz { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.sh-rz.sh-top { border-left: 4px solid var(--crit, #d64545); }
+.sh-rz.sh-top2 { border-left: 4px solid var(--warn, #d9922b); }
+.sh-rzgrid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px 14px; margin: 10px 0 6px; }
+.sh-rzgrid dt { font-size: 11px; color: var(--ink-3); text-transform: uppercase; letter-spacing: .04em; }
+.sh-rzgrid dd { margin: 2px 0 0; }
+.sh-rzwarn { color: var(--crit, #d64545); }
+.sh-rzsubs { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0; }
+.sh-rzsubs th, .sh-rzsubs td { text-align: left; padding: 5px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.sh-rzsubs th { font-size: 11px; color: var(--ink-3); font-weight: 600; }
+.sh-rzother td { color: var(--ink-2); }
+.sh-rznote { margin: 6px 0 0; }
+@media (max-width: 900px) {
+  .sh-steps { grid-template-columns: minmax(0, 1fr); }
+  .sh-rzgrid { grid-template-columns: minmax(0, 1fr); }
+  .sh-rzsubs { display: block; overflow-x: auto; }
+}
+
+/* ---------- Sloučení změn dvou lidí (2.62) ---------- */
+
+/* Pravý panel širší než minimum (2.64): karty ve dvou sloupcích; podnabídka Nového úkolu */
+:root[data-look="glass"] .rail-sub { border-color: var(--glass-line); background: #24242b; }
+:root[data-look="glass"] .rail-subb + .rail-subb { border-top-color: var(--glass-line); }
+
+/* Výběr měsíce v Přehledu a Docházce (2.64): skleněná buňka se šipkou a nabídka měsíců */
+:root[data-look="glass"] .per-btn { border-color: var(--glass-line); background: linear-gradient(135deg, rgba(255, 255, 255, .09), rgba(255, 255, 255, .025)); box-shadow: inset 0 1px 1px rgba(255, 255, 255, .18); }
+:root[data-look="glass"] .per-menu { border-color: var(--glass-line); background: #24242b; box-shadow: 0 24px 50px -10px rgba(0, 0, 0, .6); }
+
+/* Shortage v pravém panelu (2.64): jen když je panel širší než minimum */
+
+/* Kalendář v pravém panelu (2.65) */
+:root[data-look="glass"] .rail-calpop { border-color: var(--glass-line); background: #24242b; box-shadow: 0 24px 50px -10px rgba(0, 0, 0, .65); }
+
+/* Řád karet (2.65): karty různé výšky v mřížce nechávaly díry a poslední karta „spadla“ dolů
+   pod nejkratší sloupec. Sloupce se teď plní shora dolů těsně pod sebou (vícesloupcová sazba),
+   pořadí karet zůstává stejné. Na telefonu vše v jednom sloupci jako dřív. */   /* jen dvě karty vedle sebe: stejná výška */
+
+/* Stav položky Shortage (2.65): v modulu výběr nad poznámkou, v pravém panelu po najetí */
+.sh-stpick { display: block; margin-bottom: 6px; }
+.sh-stsel { width: 100%; min-height: 30px; padding: 3px 26px 3px 8px; font: 600 12px/1.2 var(--body); border-radius: 9px; }
+.sh-stsel.st-plan { color: var(--ink); background-color: color-mix(in srgb, var(--pie-3, #7aa2ff) 20%, transparent); }
+.sh-stsel.st-run { color: var(--ink); background-color: color-mix(in srgb, var(--warn) 24%, transparent); }
+.sh-stsel.st-wait { color: var(--ink); background-color: color-mix(in srgb, var(--crit) 22%, transparent); }
+.sh-stsel.st-done { color: var(--ink); background-color: color-mix(in srgb, var(--good, #3fb984) 24%, transparent); }
+:root[data-look="glass"] .rail-shstset button { border-color: var(--glass-line); }
+
+/* Časová osa v pravém panelu (2.66) */
+:root[data-look="glass"] .ag-dot { background: #1c1e25; }
+
+/* Úkoly na časové ose v modulu Úkoly (2.67) */
+
+/* Vysouvací pravý panel na tabletu a menším monitoru (2.68): tlačítko u pravého okraje,
+   panel přes obsah zprava, závoj, Esc / klepnutí mimo / křížek zavře. Na telefonu ani od 1600 px není. */
+@media screen and (min-width: 901px) and (max-width: 1599.98px) {
+  :root[data-look="glass"] .rail-tab { border-color: var(--glass-line); background: rgba(40, 40, 48, .82); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: 0 12px 30px -6px rgba(0, 0, 0, .55), inset 0 1px 1px rgba(255, 255, 255, .22); }
+  :root[data-look="glass"].rail-open .rail { border-color: var(--glass-line); background: rgba(30, 30, 37, .94); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    box-shadow: 0 30px 70px -10px rgba(0, 0, 0, .7), inset 0 1.5px 2px rgba(255, 255, 255, .22); }
+}
+@keyframes railIn { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: none; } }
+@keyframes railFade { from { opacity: 0; } to { opacity: 1; } }
