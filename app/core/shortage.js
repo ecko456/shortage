@@ -4,7 +4,7 @@ const SH_MAX_LISTS=30;
 
 const SH_MAX_ITEMS=1000;
 
-const SH_MAX_SUBS=50;
+const SH_MAX_SUBS=500;
 
 const SH_MAX_CANDS=100;
 
@@ -19,6 +19,39 @@ const SH_MAX_NOTE=2000;
 function shPlanningNote(value){
   const text=String(value==null?"":value).replace(/[\u0000-\u001F\u007F]/g," ").replace(/\s+/g," ").trim();
   return text?("Poznámka od plánování: "+text).slice(0,SH_MAX_NOTE):"";
+}
+
+function shQrChoices(values){
+  const out=[];
+  (Array.isArray(values)?values:[]).slice(0,100).forEach(v=>{const link=shLink(v&&v.link),code=shCode(link);if(code&&!out.some(x=>x.code===code))out.push({link,code});});
+  return out;
+}
+
+function shAllSubs(item){
+  const out=[...(Array.isArray(item.subs)?item.subs:[])].filter(s=>s&&typeof s==='object');
+  (Array.isArray(item.cands)?item.cands:[]).filter(s=>s&&typeof s==='object').forEach(s=>{
+    if(!out.some(x=>shPlanKeyPart(x.ean)===shPlanKeyPart(s.ean)&&x.code===s.code))out.push(s);
+  });
+  return out;
+}
+
+function shApplyNotes(list,items){
+  let updated=0,missing=0,ambiguous=0;
+  const all=list.items.flatMap(i=>[i,...(i.subs||[])]);
+  for(const incoming of items){
+    if(!incoming.note)continue;
+    const exact=all.filter(x=>shItemKey(x)===shItemKey(incoming));
+    const matches=exact.length?exact:all.filter(x=>shPlanKeyPart(x.ean)===shPlanKeyPart(incoming.ean));
+    if(!matches.length){missing++;continue;}
+    if(matches.length>1){ambiguous++;continue;}
+    const item=matches[0],previous=item.planningNote||'';
+    let manual=item.note||'';
+    if(previous)manual=manual.replace(previous,'').replace(/^\s*·\s*|\s*·\s*$/g,'').trim();
+    const next=manual.includes(incoming.note)?manual:[manual,incoming.note].filter(Boolean).join(' · ');
+    if(next!==item.note){item.note=next.slice(0,SH_MAX_NOTE);updated++;}
+    item.planningNote=incoming.note;
+  }
+  return {updated,missing,ambiguous};
 }
 
 function blankShortage(){return {lists:[],depts:[],cols:{},colors:{}};}
@@ -105,28 +138,13 @@ function shRecBuild(rows,cols){
 }
 
 function shApplyRecs(list,recs,meta){
-  const by=new Map(),cands=new Map();
-  // položky i jejich poddíly (2.29)
+  const by=new Map();
   list.items.forEach(it=>[it,...(it.subs||[])].forEach(i=>{if(i.code){if(!by.has(i.code))by.set(i.code,[]);by.get(i.code).push(i);}}));
-  // čekající poddíly s jinou operací (2.29.1): záznam s jejich kódem je přidá pod sestavu
-  list.items.forEach(it=>(it.cands||[]).forEach(c=>{if(c.code&&!by.has(c.code)){if(!cands.has(c.code))cands.set(c.code,[]);cands.get(c.code).push({it,c});}}));
   const out={matched:0,updated:0,same:0,older:0,added:0,wpa:0,missing:[]};
   const stamp=r=>({...r,at:(meta&&meta.at)||Date.now(),by:String((meta&&meta.by)||"").slice(0,60)});
   recs.forEach((r,code)=>{
     const items=by.get(code);
-    if(!items){
-      const cs=cands.get(code);
-      if(!cs){out.missing.push(code);return;}
-      out.matched++;
-      if(shWpa(r.state)){out.wpa++;return;}   // „Odesláno na WPA“: nepřidávat
-      cs.forEach(({it,c})=>{
-        if((it.subs||[]).length>=SH_MAX_SUBS)return;
-        it.subs=[...(it.subs||[]),{id:"",ean:c.ean,link:c.link,code:c.code,op:c.op,note:"",rec:stamp(r),byRec:true}];
-        it.cands=it.cands.filter(x=>x!==c);
-        out.added++;
-      });
-      return;
-    }
+    if(!items){out.missing.push(code);return;}
     out.matched++;
     items.forEach(i=>{
       const p=i.rec;
@@ -263,9 +281,8 @@ function cleanShortage(o){
   const num=v=>Number.isFinite(+v)?Math.max(0,+v):0;
   const seen=new Set(),uniq=(v,p)=>{let x=typeof v==="string"&&SAFE_ID.test(v)?v:uid(p);while(seen.has(x))x=uid(p);seen.add(x);return x;};
   // poddíl z výrobního plánu (2.29): EAN a odkaz poddílu, kód do QR, operace, poznámka, poslední záznam
-  const sub=s=>({id:"",ean:line(s.ean,60),link:shLink(s.link),code:"code" in s?shCodeClean(s.code):shCode(s.link),op:line(s.op,300),note:line(s.note,SH_MAX_NOTE),rec:shRecClean(s.rec,line),byRec:s.byRec===true,pdfHide:s.pdfHide===true,...shStClean(s,line),_id:s.id});
-  // čekající poddíl s jinou operací (2.29.1): přidá ho až poslední záznam s jeho kódem
-  const cand=c=>({ean:line(c.ean,60),link:shLink(c.link),code:shCodeClean(c.code),op:line(c.op,300)});
+  const sub=s=>({id:"",ean:line(s.ean,60),link:shLink(s.link),code:"code" in s?shCodeClean(s.code):shCode(s.link),op:line(s.op,300),name:line(s.name,200),order:line(s.order,80),index:line(s.index,40),qty:line(s.qty,40),manual:s.manual===true,sourceKey:line(s.sourceKey,160),planningNote:line(s.planningNote,SH_MAX_NOTE),note:line(s.note,SH_MAX_NOTE),rec:shRecClean(s.rec,line),byRec:s.byRec===true,pdfHide:s.pdfHide===true,...shStClean(s,line),_id:s.id});
+  // Staré čekající poddíly se přes shAllSubs převedou mezi běžné poddíly.
   const meta=m=>m&&typeof m==="object"?{file:line(m.file,160),at:num(m.at),by:line(m.by,60),rows:Math.round(num(m.rows))}:null;
   const lists=(Array.isArray(o.lists)?o.lists:[]).filter(l=>l&&typeof l==="object"&&Array.isArray(l.items)).map(l=>({
     id:uniq(l.id,"sh"),at:num(l.at),by:line(l.by,60),file:line(l.file,160),sheet:line(l.sheet,80),
@@ -277,10 +294,10 @@ function cleanShortage(o){
     // seznam ze 2.27 nemá top, op ani code: kód se dopočítá z odkazu; seznam ze 2.27.1 nemá id, note ani rec; ze 2.28 nemá subs
     items:shTopFirst(l.items.filter(i=>i&&typeof i==="object").map(i=>({id:"",order:line(i.order,80),name:line(i.name,200),ean:line(i.ean,60),
       index:line(i.index,40),qty:line(i.qty,40),top:i.top===true,top2:i.top2===true&&i.top!==true,op:line(i.op,300),link:shLink(i.link),
-      code:"code" in i?shCodeClean(i.code):shCode(i.link),note:line(i.note,SH_MAX_NOTE),rec:shRecClean(i.rec,line),pdfHide:i.pdfHide===true,full:i.full===true,
+      qrChoices:shQrChoices(i.qrChoices),planningNote:line(i.planningNote,SH_MAX_NOTE),code:"code" in i?shCodeClean(i.code):shCode(i.link),note:line(i.note,SH_MAX_NOTE),rec:shRecClean(i.rec,line),pdfHide:i.pdfHide===true,full:i.full===true,
       dept:i.dept==="-"||(typeof i.dept==="string"&&SAFE_ID.test(i.dept))?i.dept:"",...shStClean(i,line),...(line(i.pop,300)?{pop:line(i.pop,300)}:{}),
-      subs:(Array.isArray(i.subs)?i.subs:[]).filter(s=>s&&typeof s==="object").map(sub).filter(s=>s.ean||s.code).slice(0,SH_MAX_SUBS),
-      cands:(Array.isArray(i.cands)?i.cands:[]).filter(c=>c&&typeof c==="object").map(cand).filter(c=>c.code||c.ean).slice(0,SH_MAX_CANDS),_id:i.id})).filter(i=>i.ean||i.name)).slice(0,SH_MAX_ITEMS),
+      subs:shAllSubs(i).map(sub).filter(s=>s.ean||s.code).slice(0,SH_MAX_SUBS),
+      cands:[],_id:i.id})).filter(i=>i.ean||i.name)).slice(0,SH_MAX_ITEMS),
   }));
   lists.forEach(l=>{
     // id položek i poddílů jsou jedinečné v celém seznamu
@@ -339,7 +356,7 @@ function shBuild(rows,cols,colors){
     // barva výplně buňky EANu (2.61): vzorník po importu přiřadí barvám TOP / TOP 2
     const fill=shHex(r&&r[x.ean]&&r[x.ean].fill);
     if(fill)fills.set(fill,(fills.get(fill)||0)+1);
-    items.push({order,name,ean,index,qty,top:!top2&&/^top\b/i.test(g),top2,op,link:shLink(raw),code,note:shPlanningNote(t(r,x.note)),...(fill?{fill}:{})});
+    items.push({order,name,ean,index,qty,top:!top2&&/^top\b/i.test(g),top2,op,link:shLink(raw),code,note:shPlanningNote(t(r,x.note)),planningNote:shPlanningNote(t(r,x.note)),...(fill?{fill}:{})});
   });
   if(colors)shApplyColors(items,colors);
   const all=shTopFirst(items);
@@ -402,12 +419,6 @@ function shPlanRow(plan,a,e,h,m,op,link){
   if(!shPlanKeyPart(a)||!String(e==null?"":e).trim())return;
   const k=shPlanKey(a,h,m),t=String(link||"").trim();
   const row={ean:String(e).replace(/\s+/g," ").trim().slice(0,60),link:shLink(t),code:shCode(t),op:String(op==null?"":op).replace(/\s+/g," ").trim().slice(0,120)};
-  if(!shSubOp(op)){
-    plan.other.set(k,(plan.other.get(k)||0)+1);
-    // poddíl s jinou operací čeká na poslední záznam; od 2.61 i bez kódu, ať je v rozboru celá sestava
-    if(!plan.cands.has(k))plan.cands.set(k,[]);plan.cands.get(k).push(row);
-    return;
-  }
   if(!plan.rows.has(k))plan.rows.set(k,[]);
   plan.rows.get(k).push(row);
 }
@@ -415,7 +426,7 @@ function shPlanRow(plan,a,e,h,m,op,link){
 function shWpa(state){return /odeslano na wpa/.test(shOpNorm(state));}
 
 function shApplyPlan(list,plan){
-  const out={items:0,subs:0,noCode:0,other:0,cands:0,changed:0,linked:0,ambiguous:0};
+  const out={items:0,subs:0,noCode:0,other:0,cands:0,changed:0,linked:0,ambiguous:0,truncated:0};
   let selfOps=[];
   const group=(rows,self)=>{
     const by=new Map();
@@ -433,23 +444,25 @@ function shApplyPlan(list,plan){
       const matches=plan.direct.get(shPlanKeyPart(it.ean))||[];
       if(matches.length===1){it.link=matches[0].link;it.code=matches[0].code;out.linked++;}
       else if(matches.length>1)out.ambiguous++;
+      it.qrChoices=matches.length>1?shQrChoices(matches):[];
     }
-    const k=shPlanKey(it.ean,it.index,it.order),rows=plan.rows.get(k)||[],self=shPlanKeyPart(it.ean);
+    const k=shPlanKey(it.ean,it.index,it.order),rows=[...(plan.rows.get(k)||[]),...((plan.cands&&plan.cands.get(k))||[])],self=shPlanKeyPart(it.ean);
     selfOps=[];
-    const by=group(rows,self),cby=group((plan.cands&&plan.cands.get(k))||[],self);
+    const by=group(rows,self);
     it.pop=selfOps.join(" · ").slice(0,300);
-    const old=new Map((it.subs||[]).map(s=>[shPlanKeyPart(s.ean)+"|"+s.code,s]));
-    by.forEach((x,key)=>cby.delete(key));
-    // poddíl přidaný podle posledního záznamu zůstane, když ho plán pořád má
-    old.forEach((s,key)=>{if(s.byRec&&cby.has(key)&&!by.has(key)){by.set(key,{...cby.get(key),byRec:true});cby.delete(key);}});
-    if(!rows.length&&plan.other.get(k)&&![...by.values()].length)out.other++;
-    const subs=[...by.entries()].slice(0,SH_MAX_SUBS).map(([key,x])=>{const p=old.get(key);return {id:p?p.id:"",ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · "),note:p?p.note:"",rec:p?p.rec:null,byRec:x.byRec===true,pdfHide:!!(p&&p.pdfHide)};});
+    out.truncated+=Math.max(0,by.size-SH_MAX_SUBS);
+    const old=new Map((it.subs||[]).map(s=>[s.sourceKey||shPlanKeyPart(s.ean)+"|"+s.code,s]));
+    const subs=[...by.entries()].slice(0,SH_MAX_SUBS).map(([key,x])=>{
+      const p=old.get(key);
+      if(p&&p.manual)return {...p};
+      return {...(p||{}),id:p?p.id:"",ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · "),note:p?p.note:"",rec:p?p.rec:null,byRec:!!(p&&p.byRec),pdfHide:!!(p&&p.pdfHide)};
+    });
+    // Ručně opravené poddíly zachovat i po změně EANu nebo kódu v plánu.
+    old.forEach((p,key)=>{if(p.manual&&!by.has(key)&&subs.length<SH_MAX_SUBS)subs.push({...p});});
     const sig=a=>JSON.stringify((a||[]).map(s=>[s.ean,s.code,s.op]));
     if(sig(subs)!==sig(it.subs))out.changed++;
     it.subs=subs;
-    it.cands=[...cby.values()].slice(0,SH_MAX_CANDS).map(x=>({ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · ")}));
-    out.cands+=it.cands.filter(c=>c.code).length;
-    out.candsAll=(out.candsAll||0)+it.cands.length;
+    it.cands=[];
     if(subs.length){out.items++;out.subs+=subs.length;out.noCode+=subs.filter(s=>!s.code).length;}
   });
   return out;
@@ -477,11 +490,12 @@ const SH_MAX_CLIP_COLS=80;
 
 function shListBase(rows,saved){
   const width=Math.max(0,...(rows||[]).slice(0,50).map(r=>(r||[]).length));
-  const sig=c=>{const {note,...rest}=shColsClean("list",c);return JSON.stringify(rest);};
+  const sig=c=>{const {note,noteChosen,...rest}=shColsClean("list",c);return JSON.stringify(rest);};
   // Vlastní ruční mapování zachovat, pokud se jeho sloupce do tabulky vejdou.
   if(saved&&sig(saved)!==sig(SH_COLS.list)&&sig(saved)!==sig(SH_URGENT_COLS)
-    &&Object.values(shColIdx("list",saved)).every(i=>i<width))return saved;
-  return width>=19?SH_URGENT_COLS:SH_COLS.list;
+    &&Object.values(shColIdx("list",saved)).every(i=>i<width))return {...saved,note:saved.noteChosen?saved.note:(saved.note||(width>=19?'S':''))};
+  const base=width>=19?SH_URGENT_COLS:SH_COLS.list;
+  return saved&&sig(saved)===sig(base)&&saved.noteChosen?{...base,note:saved.note,noteChosen:true}:base;
 }
 
 const SH_COL_NEED={list:["ean"],planItem:["ean"],plan:["asm","sub"],move:["code","when"]};
@@ -514,6 +528,7 @@ function shColsClean(kind,c){
   Object.keys(SH_COLS[kind]).forEach(f=>{out[f]=f in c?shColLetter(c[f]):SH_COLS[kind][f];});
   SH_COL_NEED[kind].forEach(f=>{if(!out[f])out[f]=SH_COLS[kind][f];});
   if(kind==="plan"||kind==="planItem")out.sheet=String(c.sheet==null?"":c.sheet).replace(/[\u0000-\u001F\u007F]/g," ").trim().slice(0,80);
+  if(kind==="list")out.noteChosen=c.noteChosen===true;
   return out;
 }
 
@@ -549,7 +564,7 @@ function shColsGuess(kind,aoa,base){
     if(hits>best.hits)best={hits,row:ri,map};
   });
   const found=best.hits>=(kind==="planItem"?1:2);
-  const cols=shColsClean(kind,{...shColsClean(kind,base||SH_COLS[kind]),...(found?best.map:{})});
+  const cols=shColsClean(kind,{...shColsClean(kind,base||SH_COLS[kind]),...(found?best.map:{}),...(kind==="list"&&base&&base.noteChosen?{note:base.note,noteChosen:true}:{})});
   return {cols,header:found?best.row:-1,found:found?Object.keys(best.map):[]};
 }
 
@@ -579,7 +594,7 @@ function shIndexed(i){i=+i;return Number.isInteger(i)&&i>=0&&i<SH_INDEXED.length
 
 function shAnalysis(it){
   const rec=it.rec||null;
-  const subs=[...(it.subs||[]).map(s=>({ean:s.ean,code:s.code,op:s.op,rec:s.rec||null,hall:!s.byRec,byRec:!!s.byRec})),
+  const subs=[...(it.subs||[]).map(s=>({...s,rec:s.rec||null,hall:shSubOp(s.op),byRec:!!s.byRec})),
     ...(it.cands||[]).map(c=>({ean:c.ean,code:c.code,op:c.op,rec:null,hall:false,byRec:false}))];
   const cur=it.op||it.pop||"";
   const recText=r=>[r.state,r.op&&!String(r.state||"").includes(r.op)?r.op:"",r.qty?(/^[\d\s.,]+$/.test(r.qty)?r.qty+" ks":r.qty):"",r.when].filter(Boolean).join(", ");
@@ -595,7 +610,7 @@ function shAnalysisSheet(l){
   (l&&l.items||[]).forEach((it,j)=>{
     const a=shAnalysis(it),r=it.rec||{};
     rows.push([j+1,a.subs.length?"sestava":"díl",it.top?"TOP SHORTAGE":it.top2?"TOP 2":"",it.order,it.name,it.ean,it.index,it.qty,it.code,a.cur,r.state||"",r.op||"",r.qty||"",r.when||"",r.n||(it.rec?1:0),it.rec?"ano":"ne",it.note||"",a.note]);
-    a.subs.forEach((s,k)=>{const q=s.rec||{};rows.push([(j+1)+"."+(k+1),s.hall?"poddíl":"poddíl (jiná operace)","",it.order,"",s.ean,it.index,"",s.code,s.op,q.state||"",q.op||"",q.qty||"",q.when||"",q.n||(s.rec?1:0),s.rec?"ano":"ne","",""]);});
+    a.subs.forEach((s,k)=>{const q=s.rec||{};rows.push([(j+1)+"."+(k+1),s.hall?"poddíl":"poddíl (jiná operace)","",s.order||it.order,s.name||"",s.ean,s.index||it.index,s.qty||"",s.code,s.op,q.state||"",q.op||"",q.qty||"",q.when||"",q.n||(s.rec?1:0),s.rec?"ano":"ne",s.note||"",""]);});
   });
   return {name:"Rozbor",rows,cols:[6,18,13,18,30,16,8,10,18,26,28,18,10,18,9,9,30,60]};
 }

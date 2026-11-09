@@ -6,7 +6,7 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.2.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.3.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
@@ -24,10 +24,13 @@ zůstávají ve stejném profilu Windows.
 - **Výrobní plán:** dohledání poddílů podle EANu sestavy, indexu a objednávky,
   včetně rychlého čtení velkých XLSX souborů.
 - **Evidence pohybu:** soubor Excelu, CSV/text nebo Ctrl+V; nejnovější záznam ke kódu,
-  přidání poddílů z jiných operací, vynechání stavu „Odesláno na WPA“.
+  doplnění stavů a počtů. Poddíly všech operací se načítají už s výrobním plánem;
+  stav „Odesláno na WPA“ je neskryje.
   Krok je volitelný: tlačítko **Přeskočit a vytvořit PDF** rovnou vygeneruje urgenty.
 - **Úpravy:** poznámky, ruční přidání a odebrání položky, pořadí myší/klávesnicí,
-  priority, stav položky, oddělení, hledání a filtry.
+  priority, stav položky, oddělení, hledání a filtry. Propiska vedle oka otevře
+  editaci každé položky i poddílu: EAN, název, objednávka, index, množství, operace,
+  odkaz/QR, poznámka a stav. Ruční opravy poddílů se zachovají při novém načtení plánu.
 - **Rozbor:** probíhající operace, poddíly a interní záznamy, doplnění prázdných
   poznámek a export do Excelu.
 - **PDF:** A4 na šířku, QR s hodnotou `activeBarcode`, kolonky pro stav v 10:00 a
@@ -59,6 +62,16 @@ Obsah sloupce S se při importu přidá do poznámky ve tvaru
 **Poznámka od plánování: obsah buňky**. Je vidět v seznamu, PDF i rozboru do Excelu.
 Prázdná buňka nevytvoří prázdnou poznámku. Poznámka se zachová při načtení plánu a po restartu.
 
+Před každým importem urgentů se ukáže výběr sloupců a náhled. U pole **Poznámka
+od plánování** vyber **S**, jiný sloupec, nebo „v souboru není“. Ruční volba se
+zapamatuje a další odhad podle nadpisů ji nepřepíše.
+
+V už rozpracovaném seznamu použij **Doplnit poznámky z Excelu** a nahraj původní
+soubor Urgentní díly. Vyber sloupec poznámek a potvrď náhled. Nevznikne nový seznam:
+poznámky se přiřadí podle EANu, objednávky a indexu, případně podle jednoznačného
+EANu. Ruční text poznámky zůstane. Nejednoznačné a nenalezené řádky se vyčíslí a
+nepřiřadí se odhadem; poznámku můžeš dopsat propiskou.
+
 Sloupec G se u této tabulky čte jako index, nikoli jako priorita TOP. Prioritu můžeš
 zadat ručně nebo podle barev EANů. Oddělení ze sloupce S je vidět v seznamu i PDF.
 Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytvořit PDF**.
@@ -68,9 +81,15 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
 - **První list – díly bez sestav:** nastavuje se jen sloupec **EAN dílu**.
   Odkaz z jeho buňky doplní chybějící QR u urgentu, pokud je pro EAN jednoznačný.
   Už vyplněný odkaz ani kód se nepřepisuje. Pokud stejný EAN odkazuje na více různých
-  kódů, aplikace jej automaticky nedosadí.
+  kódů, položka se objeví nahoře v sekci **Nelze přidělit odkaz**. Propiskou vedle
+  oka vyber jeden z nalezených odkazů, nebo vyplň vlastní odkaz či QR kód. Po uložení
+  se vyřešená položka vrátí do běžného seznamu. Volby zůstanou dostupné i po restartu.
 - **Druhý list – sestavy a poddíly:** nastavuje se **EAN sestavy** a **EAN poddílu**,
   případně index, objednávka a probíhající operace. Platí pouze pro druhý list.
+  Doplní se poddíly **všech operací**, včetně dílů bez odkazu; následně je můžeš
+  filtrovat podle probíhajících operací a přiřadit do oddělení. Evidence pohybu je
+  volitelná. I dříve uložené čekající poddíly se v této verzi rovnou zobrazí.
+  Limit je 500 poddílů na jednu sestavu; případné překročení import oznámí.
 
 Při prvním importu se ukážou dvě samostatná okna s náhledem a volba se zapamatuje.
 Tlačítkem **Upravit sloupce** lze nastavení znovu otevřít. Soubor jen s prvním listem

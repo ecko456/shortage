@@ -31,3 +31,6 @@ a do aplikace se nepřibalují. jsQR se používá pouze v testu pro zpětné p�
 
 Verze 1.2: nativní tlačítko schránky, oddělené mapování prvního a druhého listu
 výrobního plánu a poznámka od plánování ze sloupce S.
+
+Verze 1.3: všechny operace poddílů ihned v seznamu, ruční zdroj a doplnění poznámek,
+sekce nejednoznačných QR odkazů a editace položek/poddílů včetně exportů.

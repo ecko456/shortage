@@ -45,10 +45,10 @@ test('Plán přiřadí poddíly podle sestavy, indexu a objednávky', () => {
     shApplyPlan(l,p); l.items[0].subs[0].note='Zachovat';shApplyPlan(l,p); return l.items[0];`);
   assert.equal(out.subs.length,1); assert.equal(out.subs[0].ean,'200'); assert.equal(out.subs[0].note,'Zachovat');
 });
-test('Čekající poddíl se nepřidá pro stav Odesláno na WPA', () => {
+test('Staré čekající poddíly jsou vidět a evidence včetně WPA jen doplní stav', () => {
   const out=core()(seed+`const l=cleanShortage({lists:[{id:'sh1',at:1,items:[{ean:'1',cands:[{ean:'2',code:'B.1',op:'Lakovna'}]}]}]}).lists[0];
     const r=shApplyRecs(l,shRecBuild([['B.1','22.10.2026 8:00','1','Odesláno na WPA'].map(x=>c(x))]).recs,{});return {r,subs:l.items[0].subs};`);
-  assert.equal(out.r.wpa,1); assert.deepEqual(out.subs,[]);
+  assert.equal(out.r.updated,1);assert.equal(out.subs.length,1);assert.equal(out.subs[0].rec.state,'Odesláno na WPA');
 });
 test('Sloupce se rozpoznají místně i v přeházené tabulce', () => {
   const out=core()(`return shColsGuess('list',[['EAN','Název dílu','Množství','Číslo objednávky','Index','Operace']],SH_COLS.list);`);
@@ -104,4 +104,26 @@ test('První list výrobního plánu definuje jen EAN a nastavení se uloží zv
 test('První list doplní pouze jednoznačný QR kód a zachová odkazy i poznámky', () => {
   const out=core()(seed+`const p=shPlanBlank('p.xlsx');shPlanDirectRow(p,'001',L('D.1'));shPlanDirectRow(p,'1',L('D.1'));shPlanDirectRow(p,'2',L('D.2'));shPlanDirectRow(p,'2',L('D.3'));const l={items:[{ean:'1',note:'Ručně',subs:[]},{ean:'2',code:'OWN',link:L('OWN'),subs:[]},{ean:'2',code:'',subs:[]}]};const r=shApplyPlan(l,p);return {r,items:l.items};`);
   assert.equal(out.r.linked,1);assert.equal(out.r.ambiguous,1);assert.equal(out.items[0].code,'D.1');assert.equal(out.items[0].note,'Ručně');assert.equal(out.items[1].code,'OWN');assert.equal(out.items[2].code,'');
+});
+
+test('Plán vloží všechny operace i bez QR a při opakování zachová ruční úpravy', () => {
+  const out=core()(seed+`const l={items:[{ean:'1',order:'O',index:'A',subs:[]}]};const p=shPlanBlank('p');shPlanRow(p,'1','2','A','O','Lakovna',L('B.2'));shPlanRow(p,'1','3','A','O','Kontrola','');shApplyPlan(l,p);l.items[0].subs[0]={...l.items[0].subs[0],ean:'99',code:'OWN',note:'Ručně',manual:true,sourceKey:'2|B.2',st:'run'};shApplyPlan(l,p);return l.items[0];`);
+  assert.equal(out.subs.length,2);assert.equal(out.cands.length,0);assert.equal(out.subs[0].ean,'99');assert.equal(out.subs[0].st,'run');assert.equal(out.subs[1].op,'Kontrola');
+});
+test('Ruční zdroj poznámky se pamatuje i při shodě ostatních sloupců s předvolbou', () => {
+  const out=core()(`const saved={...SH_URGENT_COLS,note:'R',noteChosen:true};const h=Array(19).fill('');h[0]='EAN';h[2]='Název dílu';h[18]='Poznámka';return [shColsGuess('list',[h],saved).cols,shColsGuess('list',[h],{...saved,note:''}).cols];`);
+  assert.equal(out[0].note,'R');assert.equal(out[1].note,'');
+});
+test('Doplnění poznámek zachová ruční text a nevybere nejednoznačný EAN', () => {
+  const out=core()(`const l={items:[{ean:'1',note:'Ručně'},{ean:'2',index:'A'},{ean:'2',index:'B'}]};const incoming=[{ean:'1',note:shPlanningNote('Termín')},{ean:'2',note:shPlanningNote('Neurčeno')}];const first=shApplyNotes(l,incoming);shApplyNotes(l,incoming);return {first,items:l.items};`);
+  assert.equal(out.first.updated,1);assert.equal(out.first.ambiguous,1);assert.equal(out.items[0].note,'Ručně · Poznámka od plánování: Termín');
+});
+test('Nejednoznačné QR volby přežijí uložení a nebezpečné odkazy se odstraní', () => {
+  const out=core()(seed+`const p=shPlanBlank('p');shPlanDirectRow(p,'1',L('A'));shPlanDirectRow(p,'1',L('B'));const l={items:[{ean:'1'}]};shApplyPlan(l,p);l.items[0].qrChoices.push({link:'javascript:x',code:'BAD'});return cleanShortage({lists:[l]}).lists[0].items[0];`);
+  assert.deepEqual(out.qrChoices.map(x=>x.code),['A','B']);assert.equal(out.code,'');
+});
+
+test('Všech 80 poddílů mimo Halu 2 se doplní hned a zachová po uložení', () => {
+  const out=core()(seed+`const p=shPlanBlank('p');for(let n=0;n<80;n++)shPlanRow(p,'1','X'+n,'A','O','Lakovna',L('B.'+n));const l={items:[{ean:'1',index:'A',order:'O'}]};shApplyPlan(l,p);return cleanShortage({lists:[l]}).lists[0].items[0];`);
+  assert.equal(out.subs.length,80);assert.equal(out.cands.length,0);
 });
