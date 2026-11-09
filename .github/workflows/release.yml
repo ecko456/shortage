@@ -1,0 +1,66 @@
+name: Vydání
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Číslo úspěšného běhu Windows se sestaveným balíčkem
+        required: true
+        type: string
+      tag:
+        description: Verze vydání (například v1.0.0)
+        required: true
+        default: v1.0.0
+        type: string
+permissions:
+  contents: write
+  actions: read
+concurrency: vydani-shortage
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      SOURCE_RUN: ${{ inputs.run_id }}
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Ověřit původ otestovaného balíčku
+        id: source
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$SOURCE_RUN" =~ ^[0-9]+$ ]]
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          gh run view "$SOURCE_RUN" --repo "$GITHUB_REPOSITORY" --json headSha,conclusion,name > run.json
+          jq -e '.conclusion == "success" and .name == "Windows"' run.json
+          source_sha="$(jq -r .headSha run.json)"
+          [[ "$source_sha" =~ ^[a-f0-9]{40}$ ]]
+          echo "sha=$source_sha" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.source.outputs.sha }}
+      - name: Stáhnout a vydat stejný otestovaný balíček
+        env:
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          app_version="$(node -p "require('./package.json').version")"
+          [[ "$RELEASE_TAG" == "v$app_version" ]]
+          gh run download "$SOURCE_RUN" --repo "$GITHUB_REPOSITORY" --name Shortage-Windows-x64 --dir release
+          package_file="Shortage-$app_version-Windows-x64.exe"
+          test -s "release/$package_file"
+          cd release
+          sha256sum "$package_file" > SHA256SUMS.txt
+          cat > notes.md <<'NOTES'
+          Samostatná offline aplikace Shortage pro Windows 10/11 (64 bitů).
+
+          Stáhněte soubor .exe a spusťte jej. Instalace ani server nejsou potřeba. Balíček není digitálně podepsaný; Windows může při prvním spuštění zobrazit SmartScreen.
+
+          Import urgentních dílů z Kooperace Hala 2 (list Shortage, TOP/TOP2, Ctrl+V), výrobní plán, evidence pohybu, poddíly, oddělení, poznámky, stavy, PDF s QR kódy a rozbor do Excelu.
+
+          Data a zálohy zůstávají v počítači v %APPDATA%\Shortage jako nešifrované JSON soubory. Automatické ukládání, posledních 20 předchozích uložených stavů a ruční záloha/obnova. Aplikace začíná prázdná a žádná data neodesílá na internet.
+
+          Prošlo 17 testů jádra/úložiště a průchod skutečným Electronem na Windows i Linuxu. Na Linuxu navíc ověřen český text a zpětné přečtení QR z PDF. Postup použití je v README repozitáře.
+          NOTES
+          printf '\nZdroj: `%s`. [Ověření na Windows](https://github.com/%s/actions/runs/%s).\n' "$SOURCE_SHA" "$GITHUB_REPOSITORY" "$SOURCE_RUN" >> notes.md
+          gh release create "$RELEASE_TAG" "$package_file" SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title "Shortage $app_version pro Windows" --notes-file notes.md --latest
