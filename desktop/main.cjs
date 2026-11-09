@@ -1,5 +1,5 @@
 'use strict';
-const { app, BrowserWindow, ipcMain, dialog, session, shell, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, session, shell, Menu, clipboard } = require('electron');
 const fs = require('node:fs/promises');
 const path = require('node:path');
 const { fileURLToPath } = require('node:url');
@@ -49,6 +49,21 @@ else {
       return text;
     });
     handle('data:folder', async () => { const error = await shell.openPath(store.dir); if (error) throw new Error(error); });
+    handle('clipboard:read', async () => {
+      const values={html:'',text:''};
+      for(const item of await clipboard.read()){
+        for(const [mime,key] of [['text/html','html'],['text/plain','text']]){
+          if(!values[key]&&item.types.includes(mime)){
+            const blob=await item.getType(mime);
+            if(blob.size>MAX_BYTES)throw new Error('Tabulka ve schránce je příliš velká. Použij Nahrát Excel.');
+            values[key]=await blob.text();
+          }
+        }
+      }
+      const {html,text}=values;
+      if(Buffer.byteLength(html)+Buffer.byteLength(text)>MAX_BYTES)throw new Error('Tabulka ve schránce je příliš velká. Použij Nahrát Excel.');
+      return {html,text};
+    });
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('will-navigate', event => event.preventDefault());
     win.on('close', event => { if (!closing) { event.preventDefault(); win.webContents.send('app:closing'); } });

@@ -9,7 +9,7 @@ on:
       tag:
         description: Verze vydání (například v1.0.0)
         required: true
-        default: v1.1.0
+        default: v1.2.0
         type: string
 permissions:
   contents: write
@@ -56,7 +56,7 @@ jobs:
 
           Stáhněte soubor .exe a spusťte jej. Instalace ani server nejsou potřeba. Balíček není digitálně podepsaný; Windows může při prvním spuštění zobrazit SmartScreen.
 
-          Import urgentů A–S (A EAN, C název, F objednávka, G index, H množství, S oddělení v procesu) i výstupu Kooperace Hala 2. Třetí krok Evidence pohybu je volitelný: tlačítko Přeskočit a vytvořit PDF rovnou vygeneruje urgenty. Dále výrobní plán, poddíly, priority, poznámky, stavy, PDF s QR kódy a rozbor do Excelu.
+          V kroku 1 jsou vedle sebe Nahrát Excel a Vložit ze schránky; samostatný blok Vložit z Excelu je odstraněný. Výrobní plán rozlišuje první list (jen EAN dílu) a druhý list (EAN sestavy a poddílu). Obsah S z urgentů se přidává do poznámek jako „Poznámka od plánování: …“. Import urgentů A–S i výstupu Kooperace Hala 2. Třetí krok Evidence pohybu je volitelný: tlačítko Přeskočit a vytvořit PDF rovnou vygeneruje urgenty. Dále výrobní plán, poddíly, priority, poznámky, stavy, PDF s QR kódy a rozbor do Excelu.
 
           Data a zálohy zůstávají v počítači v %APPDATA%\Shortage jako nešifrované JSON soubory. Automatické ukládání, posledních 20 předchozích uložených stavů a ruční záloha/obnova. Aplikace začíná prázdná a žádná data neodesílá na internet.
 

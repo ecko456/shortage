@@ -13,17 +13,13 @@
       </header>
       <ol class="sh-steps noprint" aria-label="Rozbor shortage ve třech krocích">
         <li class="sh-step" data-step="1"><span class="sh-stepn" aria-hidden="true">1</span><div><b>Urgentní díly</b><p class="small muted" id="shSt1">Tabulka z Excelu (soubor nebo Ctrl+V)</p></div>
-          <button class="btn small" type="button" id="shImport">Nahrát Excel</button><input type="file" id="shFile" accept=".xlsx,.xls,.xlsm,.ods" hidden></li>
+          <div class="sh-step-actions"><button class="btn small" type="button" id="shImport">Nahrát Excel</button><button class="btn sec small" type="button" id="shClipboard">Vložit ze schránky</button></div><input type="file" id="shFile" accept=".xlsx,.xls,.xlsm,.ods" hidden></li>
         <li class="sh-step" data-step="2"><span class="sh-stepn" aria-hidden="true">2</span><div><b>Výrobní plán</b><p class="small muted" id="shSt2">Poddíly sestav a probíhající operace</p></div>
           <button class="btn sec small" type="button" id="shPlanBtn">Výrobní plán</button><input type="file" id="shPlanFile" accept=".xlsx,.xlsm,.xls,.ods" hidden></li>
         <li class="sh-step" data-step="3"><span class="sh-stepn" aria-hidden="true">3</span><div><b>Evidence pohybu · volitelné</b><p class="small muted" id="shSt3">Lze přeskočit a rovnou vytvořit PDF urgentů</p></div>
           <div class="sh-step-actions"><button class="btn sec small" type="button" id="shMoveBtn">Evidence pohybu</button><button class="btn small" type="button" id="shSkipMove" disabled>Přeskočit a vytvořit PDF</button></div><input type="file" id="shMoveFile" accept=".xlsx,.xls,.xlsm,.ods,.csv,.txt" hidden></li>
       </ol>
       <div id="shMergeBar" class="sh-mergebar noprint" role="status" hidden></div>
-      <label class="sh-paste noprint" for="shPaste">
-        <span><b>Vložit z Excelu</b> · zkopíruj celou oblast A–S: A EAN, C název, F objednávka, G index, H urgentní množství, S oddělení v procesu. Klikni sem a vlož přes Ctrl+V. Funguje i tabulka Shortage z Kooperace (A–H).</span>
-        <textarea id="shPaste" rows="1" placeholder="Sem vlož tabulku (Ctrl+V)" autocomplete="off" spellcheck="false"></textarea>
-      </label>
       <div id="shMsg" class="sh-msg noprint" aria-live="polite"></div>
       <div id="shView"></div>
     </section></main><dialog class="dlg" id="dlg" aria-labelledby="dlgTitle">

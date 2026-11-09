@@ -45,7 +45,7 @@ async function download(selector,name){
 function workbook(file,sheets){const wb=X.utils.book_new();for(const [name,ws] of sheets)X.utils.book_append_sheet(wb,ws,name);require('node:fs').writeFileSync(file,X.write(wb,{type:'buffer',bookType:'xlsx'}));}
 async function paste(html,text){await page.evaluate(({html,text})=>{
   const d=new DataTransfer();d.setData('text/html',html);d.setData('text/plain',text);
-  document.querySelector('#shPaste').dispatchEvent(new ClipboardEvent('paste',{clipboardData:d,bubbles:true,cancelable:true}));
+  document.querySelector('#shClipboard').dispatchEvent(new ClipboardEvent('paste',{clipboardData:d,bubbles:true,cancelable:true}));
 },{html,text});}
 (async()=>{
   await fs.mkdir(resultDir,{recursive:true});profile=await fs.mkdtemp(path.join(os.tmpdir(),'shortage-e2e-'));
@@ -65,11 +65,17 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   const rows=[head];
   for(const [ean,op]of [['0000901','Brush Hala 2'],['0000902','Lakovna'],['0000903','Lakovna']]){const r=Array(39).fill('');r[0]='0000456';r[4]=ean;r[7]='A';r[12]='OBJ2';r[38]=op;rows.push(r);}
   const pws=X.utils.aoa_to_sheet(rows);for(let r=2;r<=4;r++)pws['E'+r].l={Target:'https://erp.example/?activeBarcode=B.'+(r-1)};
-  workbook(planFile,[['Souhrn',X.utils.aoa_to_sheet([['Souhrn']])],['Poddíly',pws]]);
+  const dws=X.utils.aoa_to_sheet([['Popis','EAN dílu'],['Samostatný díl','0000123'],['Sestava v plánu','0000456']]);
+  dws.B2.l={Target:'https://erp.example/?activeBarcode=A.1'};dws.B3.l={Target:'https://erp.example/?activeBarcode=A.2'};
+  workbook(planFile,[['Díly',dws],['Poddíly',pws]]);
   const moves=path.join(resultDir,'pohyb.xlsx');
   workbook(moves,[['Pohyb',X.utils.aoa_to_sheet([['QR kód','Datum a čas','Počet ks','Stav'],['A.1','22.10.2026 9:00',5,'Hotová kontrola'],['B.1','22.10.2026 9:30',10,'Broušení'],['B.2','22.10.2026 9:35',10,'Lakovna'],['B.3','22.10.2026 9:40',10,'Odesláno na WPA']])]]);
   await open();
   assert.match(await page.locator('#shView').innerText(),/Zatím žádný seznam/);
+  assert.equal(await page.locator('.sh-paste').count(),0);
+  await app.evaluate(({clipboard})=>clipboard.clear());await page.locator('#shClipboard').click();
+  await page.waitForFunction(()=>$('#toast').textContent.includes('Schránka je prázdná'));
+  assert.equal(await page.evaluate(()=>S.shortage.lists.length),0);
   assert.equal(await page.locator('#shSkipMove').isDisabled(),true);
   await page.locator('#shFile').setInputFiles(urgent);
   await page.waitForFunction(()=>S.shortage.lists[0]?.items.length===3);
@@ -79,7 +85,24 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await saved();
   console.log('ok import Excelu, EAN s nulami a priority');
   await page.locator('#shPlanFile').setInputFiles(planFile);
+  await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),1);assert.equal(await page.locator('#dlg [name="c-ean"]').inputValue(),'B');
+  await page.locator('#dlgOk').click();
+  await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('2. list'));
+  assert.equal(await page.locator('#dlg [name="c-asm"]').inputValue(),'A');assert.equal(await page.locator('#dlg [name="c-sub"]').inputValue(),'E');
+  await page.locator('#dlgCancel').click();
+  assert.equal(await page.evaluate(()=>S.shortage.cols.planItem),undefined);assert.equal(await page.evaluate(()=>shList().plan),null);
+  await page.locator('#shPlanFile').setInputFiles(planFile);
+  await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));await page.locator('#dlgOk').click();
+  await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('2. list'));await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items.find(x=>x.ean==='0000456')?.subs.length===1);
+  assert.equal(await page.evaluate(()=>S.shortage.cols.planItem.ean),'B');assert.equal(await page.evaluate(()=>S.shortage.cols.plan.sheet),'Poddíly');
+  const parity=await page.evaluate(async()=>{
+    const sig=p=>JSON.stringify([p.sheet,p.itemSheet,[...p.direct],[...p.rows],[...p.other],[...p.cands]]);
+    const fast=sig(ui.sh.plan);window.SH_PLAN_SHEETJS=true;
+    try{return fast===sig(await shPlanRead(ui.sh.last.plan.file,null,shc().cols.plan,shc().cols.planItem));}
+    finally{delete window.SH_PLAN_SHEETJS;}
+  });assert.equal(parity,true);
   assert.equal(await page.locator('tr[data-shsub]').count(),1);
   await page.locator('#shMoveFile').setInputFiles(moves);
   await page.waitForFunction(()=>shList().items.find(x=>x.ean==='0000456')?.subs.length===2);
@@ -143,9 +166,11 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await download('#shSkipMove','urgenty-bez-evidence.pdf');
   // HTML ze schránky musí zachovat odkaz u A i oddělení ze sloupce S.
   const htmlWide='<table><tr>'+wide.map((v,i)=>'<td>'+(i===0?'<a href="https://erp.example/?activeBarcode=U.1">'+v+'</a>':v)+'</td>').join('')+'</tr></table>';
-  await paste(htmlWide,wide.join('\t'));await page.waitForFunction(()=>S.shortage.lists.length===5);
+  await app.evaluate(({clipboard,ClipboardItem}, data)=>clipboard.write([new ClipboardItem({'text/html':data.html,'text/plain':data.text})]),{html:htmlWide,text:wide.join('\t')});
+  await page.locator('#shClipboard').click();await page.waitForFunction(()=>S.shortage.lists.length===5);
   assert.equal(await page.evaluate(()=>shList().items[0].code),'U.1');
   assert.equal(await page.evaluate(()=>shList().items[0].op),'Brus Hala 2');
+  assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');
   const rawFile=path.join(resultDir,'urgenty-a-s.xlsx');
   const rawHead=Array(19).fill('');rawHead[0]='EAN';rawHead[2]='Název dílu';rawHead[5]='Číslo objednávky';rawHead[6]='Index';rawHead[7]='Urgentní množství';rawHead[18]='Oddělení kde v procesu';
   const rawRow=wide.slice();rawRow[0]=555;rawRow[5]='OBJ88';rawRow[6]='B';rawRow[7]=10;
@@ -153,11 +178,24 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   workbook(rawFile,[['Urgenty',rawSheet]]);
   await page.locator('#shFile').setInputFiles(rawFile);await page.waitForFunction(()=>S.shortage.lists.length===6);
   assert.deepEqual(await page.evaluate(()=>{const i=shList().items[0];return [i.ean,i.order,i.qty,i.op,i.code];}),['0000555','OBJ88','10','Brus Hala 2','U.2']);
+  assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');
   assert.equal(await page.evaluate(()=>shList().moves),null);assert.equal(await page.evaluate(()=>shList().plan),null);
   const rawPdf=await download('#shSkipMove','urgenty-a-s.pdf');await saved();
   assert.equal(await page.evaluate(()=>shList().moves),null);
   await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(resultDir,'urgenty-a-s.png'),fullPage:true});
   console.log('ok urgenty A–S: text, HTML, Excel a PDF bez kroku 3');
+  // Soubor jen s prvním listem: výběr jednoho EAN sloupce, žádný dotaz na sestavu.
+  await paste('',wide.join('\t'));await page.waitForFunction(()=>S.shortage.lists.length===7);
+  const one=path.join(resultDir,'plan-jen-dily.xlsx');const oneWs=X.utils.aoa_to_sheet([['','','','EAN dílu'],['','','','0000555']]);oneWs.D2.l={Target:'https://erp.example/?activeBarcode=U.0'};
+  workbook(one,[['Jen díly',oneWs]]);await page.locator('#shPlanFile').setInputFiles(one);
+  await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),1);await page.locator('#dlgOk').click();
+  await page.waitForFunction(()=>shList().items[0].code==='U.0');
+  assert.equal(await page.locator('#dlg[open]').count(),0);assert.equal(await page.evaluate(()=>shList().items[0].subs.length),0);
+  assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');await saved();
+  await page.reload();await page.waitForFunction(()=>typeof initialized!=='undefined' && initialized);
+  assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');
+  console.log('ok tlačítko schránky, poznámky S a výrobní plán se samostatnými listy');
   await page.locator('#restore').click();await page.locator('#dlg[open]').waitFor();await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>S.shortage.lists.length===1 && $('#saveState').dataset.state==='saved');
   assert.equal(await page.evaluate(()=>shList().items[0].note),'Dodat do 10:00');
@@ -180,6 +218,7 @@ print(json.dumps({'w':pix.width,'h':pix.height,'landscape':p.rect.width>p.rect.h
   if(py.status===0){
     const info=JSON.parse(py.stdout);assert.equal(info.landscape,true);assert.match(info.text.replace(/\s+/g,' '),/Dodat do 10:00/);
     assert.match(info.raw,/OBJ88/);assert.match(info.raw,/Brus Hala 2/);assert.match(info.raw,/U\.2/);assert.match(info.raw,/0000555/);
+    assert.match(info.raw.replace(/\s+/g,' '),/Poznámka od plánování:/);
     const rgb=await fs.readFile(path.join(resultDir,'qr.raw'));const rgba=new Uint8ClampedArray(info.w*info.h*4);
     for(let i=0;i<info.w*info.h;i++){rgba[i*4]=rgb[i*3];rgba[i*4+1]=rgb[i*3+1];rgba[i*4+2]=rgb[i*3+2];rgba[i*4+3]=255;}
     const qr=require('jsqr')(rgba,info.w,info.h);assert.ok(qr,'QR kód v PDF musí jít přečíst');assert.equal(qr.data,'A.1');

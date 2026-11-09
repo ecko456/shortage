@@ -13,7 +13,7 @@ async function restoreData() {
     S = next; persisted = structuredClone(next); dirty = false; initialized = true;
     $('#view-shortage').inert = false;
     Object.assign(ui.sh, { open: null, plan: null, last: null, merge: null, ops: [], depts: [], q: '', mode: 'list' });
-    $('#shMsg').innerHTML = ''; $('#shPaste').value = '';
+    $('#shMsg').innerHTML = '';
     renderShortage(); $('#saveState').textContent = 'Záloha obnovena'; $('#saveState').dataset.state = 'saved';
     toast('Záloha byla obnovena.');
   } catch (error) { toast(error.message, true); }

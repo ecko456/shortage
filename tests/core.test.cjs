@@ -93,3 +93,15 @@ test('Název s urgent a index TOP se nezamění za hlavičku bez nadpisů', () =
   const out=core()(`const r=Array(19).fill('');r[0]='0000555';r[2]='Držák urgent';r[5]='OBJ77';r[6]='TOP';r[7]='12,5';r[18]='Brus';return shColsGuess('list',[r],SH_COLS.list);`);
   assert.equal(out.header,-1);assert.deepEqual(out.found,[]);assert.equal(out.cols.qty,'H');assert.equal(out.cols.top,'');
 });
+test('Sloupec S je i poznámka od plánování, staré uložené mapování ji nevypne', () => {
+  const out=core()(seed+`const r=Array.from({length:19},()=>c(''));r[0]=c('001');r[2]=c('Držák');r[18]=c('Dodržet termín 10:00');const old={order:'F',name:'C',ean:'A',index:'G',qty:'H',top:'',op:'S'};const cols=shColsGuess('list',[r.map(x=>x.text)],old).cols;return {item:shBuild([r],cols).items[0],blank:shPlanningNote('  '),long:cleanShortage({lists:[{id:'sh1',items:[{ean:'1',note:shPlanningNote('x'.repeat(700))}]}]}).lists[0].items[0].note};`);
+  assert.equal(out.item.note,'Poznámka od plánování: Dodržet termín 10:00');assert.equal(out.item.op,'Dodržet termín 10:00');assert.equal(out.blank,'');assert.equal(out.long,'Poznámka od plánování: '+'x'.repeat(700));
+});
+test('První list výrobního plánu definuje jen EAN a nastavení se uloží zvlášť', () => {
+  const out=core()(`return {fields:Object.keys(SH_COL_NAMES.planItem),guess:shColsGuess('planItem',[['Popis','EAN dílu']],SH_COLS.planItem),saved:cleanShortage({cols:{planItem:{ean:'B',sheet:'Díly'},plan:{asm:'A',sub:'E',sheet:'Sestavy'}}}).cols};`);
+  assert.deepEqual(out.fields,['ean']);assert.equal(out.guess.cols.ean,'B');assert.equal(out.guess.header,0);assert.equal(out.saved.planItem.ean,'B');assert.equal(out.saved.plan.sheet,'Sestavy');
+});
+test('První list doplní pouze jednoznačný QR kód a zachová odkazy i poznámky', () => {
+  const out=core()(seed+`const p=shPlanBlank('p.xlsx');shPlanDirectRow(p,'001',L('D.1'));shPlanDirectRow(p,'1',L('D.1'));shPlanDirectRow(p,'2',L('D.2'));shPlanDirectRow(p,'2',L('D.3'));const l={items:[{ean:'1',note:'Ručně',subs:[]},{ean:'2',code:'OWN',link:L('OWN'),subs:[]},{ean:'2',code:'',subs:[]}]};const r=shApplyPlan(l,p);return {r,items:l.items};`);
+  assert.equal(out.r.linked,1);assert.equal(out.r.ambiguous,1);assert.equal(out.items[0].code,'D.1');assert.equal(out.items[0].note,'Ručně');assert.equal(out.items[1].code,'OWN');assert.equal(out.items[2].code,'');
+});

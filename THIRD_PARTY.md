@@ -28,3 +28,6 @@ Z původních stylů jsou odstraněny nepotřebné části ostatních pohledů.
 Electron přidává do výsledného balíčku vlastní `LICENSE` a
 `LICENSES.chromium.html`. Vývojové nástroje a jejich licence jsou v `node_modules`
 a do aplikace se nepřibalují. jsQR se používá pouze v testu pro zpětné přečtení QR z PDF.
+
+Verze 1.2: nativní tlačítko schránky, oddělené mapování prvního a druhého listu
+výrobního plánu a poznámka od plánování ze sloupce S.

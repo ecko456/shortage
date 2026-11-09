@@ -6,7 +6,7 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.1.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.2.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
@@ -20,7 +20,7 @@ zůstávají ve stejném profilu Windows.
 ## Co aplikace umí
 
 - **Urgentní díly:** Excel (`xlsx`, `xls`, `xlsm`, `ods`) nebo vložení tabulky přes
-  Ctrl+V, zachování nul v EANu a odkazů, TOP SHORTAGE / TOP 2 podle textu nebo barvy.
+  **Vložit ze schránky** nebo Ctrl+V, zachování nul v EANu a odkazů, TOP SHORTAGE / TOP 2 podle textu nebo barvy.
 - **Výrobní plán:** dohledání poddílů podle EANu sestavy, indexu a objednávky,
   včetně rychlého čtení velkých XLSX souborů.
 - **Evidence pohybu:** soubor Excelu, CSV/text nebo Ctrl+V; nejnovější záznam ke kódu,
@@ -41,7 +41,8 @@ online stránky ERP z této offline aplikace neotvírá.
 
 ### Tabulka urgentů A–S
 
-V Excelu zkopíruj **celou oblast A–S**, i s mezilehlými sloupci, a vlož ji přes Ctrl+V.
+V Excelu zkopíruj **celou oblast A–S**, i s mezilehlými sloupci, a v kroku 1 klikni na
+**Vložit ze schránky** vedle **Nahrát Excel**. Funguje také Ctrl+V mimo vstupní pole.
 Funguje s hlavičkou i bez ní, jako HTML tabulka s odkazy nebo obyčejný text.
 Stejný formát jde načíst ze souboru Excelu.
 
@@ -54,9 +55,26 @@ Stejný formát jde načíst ze souboru Excelu.
 | H | Urgentní množství |
 | S | Oddělení / operace v procesu |
 
+Obsah sloupce S se při importu přidá do poznámky ve tvaru
+**Poznámka od plánování: obsah buňky**. Je vidět v seznamu, PDF i rozboru do Excelu.
+Prázdná buňka nevytvoří prázdnou poznámku. Poznámka se zachová při načtení plánu a po restartu.
+
 Sloupec G se u této tabulky čte jako index, nikoli jako priorita TOP. Prioritu můžeš
 zadat ručně nebo podle barev EANů. Oddělení ze sloupce S je vidět v seznamu i PDF.
 Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytvořit PDF**.
+
+### Výrobní plán: dva různé listy
+
+- **První list – díly bez sestav:** nastavuje se jen sloupec **EAN dílu**.
+  Odkaz z jeho buňky doplní chybějící QR u urgentu, pokud je pro EAN jednoznačný.
+  Už vyplněný odkaz ani kód se nepřepisuje. Pokud stejný EAN odkazuje na více různých
+  kódů, aplikace jej automaticky nedosadí.
+- **Druhý list – sestavy a poddíly:** nastavuje se **EAN sestavy** a **EAN poddílu**,
+  případně index, objednávka a probíhající operace. Platí pouze pro druhý list.
+
+Při prvním importu se ukážou dvě samostatná okna s náhledem a volba se zapamatuje.
+Tlačítkem **Upravit sloupce** lze nastavení znovu otevřít. Soubor jen s prvním listem
+se také načte; žádná pole sestavy po něm aplikace nepožaduje.
 
 ### Výstup z Kooperace Hala 2
 
