@@ -98,11 +98,12 @@ const shColsText = (kind, cols) => Object.keys(SH_COL_NAMES[kind]).filter(f => c
 async function shColsFor(kind, sheets, { file = '', pick = 0, force = false } = {}) {
   const c = shc();
   const saved = c.cols && c.cols[kind];
-  const base = saved || SH_COLS[kind];
   let sheetI = Math.min(Math.max(0, pick), Math.max(0, sheets.length - 1));
-  const guess = shColsGuess(kind, (sheets[sheetI] || {}).rows || [], base);
+  const sample = (sheets[sheetI] || {}).rows || [];
+  const base = kind === 'list' ? shListBase(sample, saved) : saved || SH_COLS[kind];
+  const guess = shColsGuess(kind, sample, base);
   let cols = guess.cols;
-  let how = guess.found.length ? 'odhad podle nadpisů' : saved ? 'uložené nastavení' : 'výchozí sloupce';
+  let how = guess.found.length ? 'odhad podle nadpisů' : kind === 'list' && base === SH_URGENT_COLS ? 'tabulka urgentů A–S' : saved ? 'uložené nastavení' : 'výchozí sloupce';
   let note = '';
   let header = guess.header;
   if (kind === 'plan') cols.sheet = (sheets[sheetI] || {}).name || '';
@@ -274,7 +275,7 @@ function shMergeBar() {
     <button class="btn ghost small" type="button" data-shmergeoff>Zrušit</button>` : '';
 }
 
-const SH_NONE = 'Čeká se číslo objednávky ve sloupci A, název dílu v B a EAN s odkazem v C (D index, E urgentní množství, G TOP, H probíhající operace).';
+const SH_NONE = 'Vlož celou tabulku urgentů A–S: A EAN, C název, F objednávka, G index, H množství, S oddělení v procesu. Podporovaný je i výstup Shortage z Kooperace (A–H).';
 
 async function shImportFile(file, force = false) {
   if (!file) return;
@@ -331,19 +332,19 @@ function shClipRows(html, text) {
     if (table) {
       return { plain: false, rows: [...table.rows].slice(0, 20001).map(tr => {
         const row = [];
-        [...tr.cells].forEach(td => {
+        [...tr.cells].slice(0, SH_MAX_CLIP_COLS).forEach(td => {
           td.querySelectorAll('br').forEach(br => br.replaceWith(' '));
           const a = td.querySelector('a[href]');
           const st = /background(?:-color)?\s*:\s*([^;"']+)/i.exec(td.getAttribute('data-st') || '');
           const bg = st ? st[1].trim() : cls[String(td.className || '').toLowerCase().split(/\s+/).find(k => cls[k]) || ''] || '';
           row.push({ text: td.textContent, link: a ? a.getAttribute('href').trim() : '', fill: shCssHex(bg) });
-          for (let i = 1; i < Math.min(td.colSpan || 1, 8); i += 1) row.push({ text: '', link: '' });
+          for (let i = 1; i < Math.min(td.colSpan || 1, SH_MAX_CLIP_COLS); i += 1) row.push({ text: '', link: '' });
         });
-        return row.slice(0, 8);
+        return row.slice(0, SH_MAX_CLIP_COLS);
       }) };
     }
   }
-  return { plain: true, rows: shTsv(text).slice(0, 20001).map(r => r.slice(0, 8).map(t => ({ text: t, link: '' }))) };
+  return { plain: true, rows: shTsv(text).slice(0, 20001).map(r => r.slice(0, SH_MAX_CLIP_COLS).map(t => ({ text: t, link: '' }))) };
 }
 
 function shCssHex(v) {
@@ -363,9 +364,10 @@ function shCssHex(v) {
 async function shPaste(html, text, force = false) {
   const msg = $('#shMsg');
   const clip = shClipRows(html, text);
-  ui.sh.last = { ...(ui.sh.last || {}), [shLooksLikeRecs(clip.rows) ? 'move' : 'list']: { html, text } };
+  const movement = Math.max(0, ...clip.rows.slice(0,50).map(r => r.length)) < 19 && shLooksLikeRecs(clip.rows);
+  ui.sh.last = { ...(ui.sh.last || {}), [movement ? 'move' : 'list']: { html, text } };
   // poslední záznamy (A QR kód, B datum a čas, C ks, D stav) se poznají podle data ve sloupci B
-  if (shLooksLikeRecs(clip.rows)) {
+  if (movement) {
     const how = await shColsFor('move', [{ name: 'schránka', rows: shTextRows(clip.rows) }], { file: 'vloženo ze schránky', force });
     if (how) shPasteRecs(clip.rows, { file: 'vloženo ze schránky', paste: true, cols: how });
     return;
@@ -614,7 +616,9 @@ function shStepsDraw(l) {
   const subsN = l ? l.items.reduce((a, i) => a + (i.subs || []).length + (i.cands || []).length, 0) : 0;
   st(2, l && l.plan, l && l.plan ? `${l.plan.file} · ${subsN} ${shSubsN(subsN)}` : pl ? `${pl.file} načtený, čeká na seznam` : 'Poddíly sestav a probíhající operace');
   const recs = l ? l.items.filter(i => i.rec).length : 0;
-  st(3, l && l.moves, l && l.moves ? `${l.moves.file} · záznam u ${recs} z ${l.items.length}` : 'Poslední interní záznamy (soubor nebo Ctrl+V)');
+  st(3, l && l.moves, l && l.moves ? `${l.moves.file} · záznam u ${recs} z ${l.items.length}` : 'Volitelné – lze přeskočit a rovnou vytvořit PDF urgentů');
+  $('#shSkipMove').disabled = !l || !l.items.length;
+  $('#shSkipMove').textContent = l && l.moves ? 'Vytvořit PDF urgentů' : 'Přeskočit a vytvořit PDF';
 }
 
 function renderShortage() {
@@ -625,7 +629,7 @@ function renderShortage() {
   const l = shList();
   shStepsDraw(l);
   if (!l) {
-    box.innerHTML = `<div class="card">${emptyState('Zatím žádný seznam', 'Tabulku z Excelu vlož přes Ctrl+V (do pole nahoře), nebo ji načti tlačítkem Nahrát Excel: ve sloupci A číslo objednávky, v B název dílu, v C EAN s vloženým odkazem, v D index, v E urgentní množství, v G „TOP“ pro TOP SHORTAGE a v H probíhající operace. Do QR kódu v PDF jde activeBarcode z odkazu.', '<button class="btn" type="button" data-shimport>Nahrát Excel</button> <button class="btn sec" type="button" data-shmanual>Přidat položku ručně</button>')}</div>`;
+    box.innerHTML = `<div class="card">${emptyState('Zatím žádný seznam', `${SH_NONE} Tabulku vlož přes Ctrl+V nebo načti tlačítkem Nahrát Excel. Pro QR kódy zachovej odkazy u EANů s activeBarcode. Evidenci pohybu můžeš přeskočit.`, '<button class="btn" type="button" data-shimport>Nahrát Excel</button> <button class="btn sec" type="button" data-shmanual>Přidat položku ručně</button>')}</div>`;
     return;
   }
   const n = l.items.length, coded = l.items.filter(i => i.code).length, top = l.items.filter(i => i.top).length, top2 = l.items.filter(i => i.top2).length, recs = l.items.filter(i => i.rec).length;
@@ -731,7 +735,7 @@ function renderShortage() {
       <p class="tiny muted sh-hint">Pořadí změníš přetažením řádku myší (na telefonu za úchyt vlevo), poddíly jdou se sestavou. TOP SHORTAGE zůstávají nahoře, pod nimi TOP 2 (zpracovat hned po TOP shortage); tlačítka TOP a TOP2 na konci řádku je označí nebo odznačí ručně. S oddělením jde řádek přetáhnout i do jiného oddělení. Poslední záznamy vlož přes Ctrl+V: A QR kód, B datum a čas, C počet ks, D stav. Oko na konci řádku položku skryje v PDF (sestavu i s poddíly). Sestavu s poddíly ukáže celou (QR kód, záznam, kolonky) tlačítko Zobrazit plně.</p>
       <p class="small sh-planinfo">${planInfo}${planUse}</p>
       ${deptChips}${opChips}
-      <div class="table-card flat"><table class="stack sh-tab"><thead><tr><th class="sh-gripc"><span class="sr-only">Přesunout</span></th><th>#</th><th>Číslo objednávky</th><th>Název dílu · EAN</th><th>Index</th><th class="num">Urgentní množství</th><th>Operace · poslední záznam</th><th>QR kód</th><th>Poznámka</th><th class="sh-actc"><span class="sr-only">Odebrat</span></th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="table-card flat"><table class="stack sh-tab"><thead><tr><th class="sh-gripc"><span class="sr-only">Přesunout</span></th><th>#</th><th>Číslo objednávky</th><th>Název dílu · EAN</th><th>Index</th><th class="num">Urgentní množství</th><th>Oddělení / operace · poslední záznam</th><th>QR kód</th><th>Poznámka</th><th class="sh-actc"><span class="sr-only">Odebrat</span></th></tr></thead><tbody>${rows}</tbody></table></div>
       <p class="tiny muted sh-none"${n ? ' hidden' : ''}>${n ? 'Nic neodpovídá hledání.' : 'V seznamu nezbyla žádná položka.'}</p>
     </article>${older}`;
   shFilter();
@@ -1005,6 +1009,7 @@ function bindShortage() {
   $('#shPlanFile').onchange = event => { const f = event.target.files[0]; event.target.value = ''; shPlanImport(f); };
   $('#shMoveBtn').onclick = () => $('#shMoveFile').click();
   $('#shMoveFile').onchange = event => { const f = event.target.files[0]; event.target.value = ''; shMoveImport(f); };
+  $('#shSkipMove').onclick = () => { const l = shList(); if (l) exportShortagePdf(l.id, $('#shSkipMove')); };
   const view = $('#view-shortage');
   view.addEventListener('pointerdown', shDragDown);
   view.addEventListener('keydown', shGripKey);
@@ -1267,7 +1272,7 @@ function pdfQr(doc, text, x, y, size) {
   return true;
 }
 
-const SH_PDF_COLS = [['#', 7], ['QR kód', 21], ['Číslo objednávky', 30], ['Název dílu · EAN', 46], ['Index', 12], ['Urgentní množství', 18], ['Operace · poslední záznam', 38], ['Stav k 10:00', 24], ['Stav k 13:00', 24], ['Poznámky', 0]];
+const SH_PDF_COLS = [['#', 7], ['QR kód', 21], ['Číslo objednávky', 30], ['Název dílu · EAN', 46], ['Index', 12], ['Urgentní množství', 18], ['Oddělení / operace', 38], ['Stav k 10:00', 24], ['Stav k 13:00', 24], ['Poznámky', 0]];
 
 const SH_MONO = { ink: [0, 0, 0], ink2: [45, 45, 45], ink3: [95, 95, 95], line: [150, 150, 150], line2: [95, 95, 95], head: [222, 222, 222], top: [236, 236, 236], asm: [246, 246, 246], write: [120, 120, 120] };
 

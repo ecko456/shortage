@@ -310,8 +310,8 @@ function shIsHeader(t){
 function shBuild(rows,cols,colors){
   rows=Array.isArray(rows)?rows:[];
   const t=(r,c)=>c<0?"":String((r&&r[c]&&r[c].text)!=null?r[c].text:"").replace(/[\u0000-\u001F\u007F]/g," ").replace(/\s+/g," ").trim();
-  // sloupce (2.61): výchozí A objednávka, B název, C EAN, D index, E množství, G TOP, H operace
-  const x=shColIdx("list",cols);
+  // Podle šířky tabulky urgenty A–S nebo Shortage z Kooperace A–H; ruční volba má přednost.
+  const x=shColIdx("list",cols||shListBase(rows));
   let header=-1;
   for(let i=0;i<Math.min(rows.length,15);i++)if(shIsHeader([x.order,x.name,x.ean,x.index,x.qty].map(c=>t(rows[i],c)))){header=i;break;}
   const items=[],warn={noLink:0,noCode:0,noEan:0,skipped:0},fills=new Map();
@@ -449,16 +449,29 @@ const SH_COLS={
   move:{code:"A",when:"B",qty:"C",state:"D",op:""},
 };
 
+// Široká vstupní tabulka urgentů A–S; starý výstup Kooperace A–H zůstává podporovaný.
+const SH_URGENT_COLS={order:"F",name:"C",ean:"A",index:"G",qty:"H",top:"",op:"S"};
+const SH_MAX_CLIP_COLS=80;
+
+function shListBase(rows,saved){
+  const width=Math.max(0,...(rows||[]).slice(0,50).map(r=>(r||[]).length));
+  const sig=c=>JSON.stringify(shColsClean("list",c));
+  // Vlastní ruční mapování zachovat, pokud se jeho sloupce do tabulky vejdou.
+  if(saved&&sig(saved)!==sig(SH_COLS.list)&&sig(saved)!==sig(SH_URGENT_COLS)
+    &&Object.values(shColIdx("list",saved)).every(i=>i<width))return saved;
+  return width>=19?SH_URGENT_COLS:SH_COLS.list;
+}
+
 const SH_COL_NEED={list:["ean"],plan:["asm","sub"],move:["code","when"]};
 
 const SH_COL_NAMES={
-  list:{order:"Číslo objednávky",name:"Název dílu",ean:"EAN (s odkazem, barva = TOP)",index:"Index",qty:"Urgentní množství",top:"TOP (text)",op:"Probíhající operace"},
+  list:{order:"Číslo objednávky",name:"Název dílu",ean:"EAN (s odkazem, barva = TOP)",index:"Index",qty:"Urgentní množství",top:"TOP (text)",op:"Oddělení / operace v procesu"},
   plan:{asm:"EAN sestavy",sub:"EAN poddílu (s odkazem)",index:"Index",order:"Číslo objednávky",op:"Probíhající operace"},
   move:{code:"QR kód",when:"Datum a čas",qty:"Počet ks",state:"Stav",op:"Operace / pracoviště"},
 };
 
 const SH_COL_WORDS={
-  list:{order:/objedn|zakaz/,name:/nazev|popis|^dil\b/,ean:/\bean\b|carov/,index:/^index|^idx/,qty:/mnozstv|urgent|^ks\b|pocet/,top:/^top\b|priorit/,op:/operac|probih/},
+  list:{order:/objedn|zakaz/,name:/nazev|popis|^dil\b/,ean:/\bean\b|carov/,index:/^index|^idx/,qty:/mnozstv|urgent|^ks\b|pocet/,top:/^top\b|priorit/,op:/operac|probih|oddeleni|kde.*proces/},
   plan:{asm:/sestav/,sub:/poddil|komponent/,index:/^index|^idx/,order:/objedn|zakaz/,op:/probih|operac/},
   move:{code:/\bqr\b|barcode|^kod/,when:/datum|\bcas\b|time/,qty:/\bks\b|mnozstv|pocet/,state:/stav|status|udalost/,op:/operac|pracovist/},
 };
@@ -489,6 +502,7 @@ function shColIdx(kind,cols){
 function shColsOf(kind,sh){return shColsClean(kind,((sh||S.shortage||{}).cols||{})[kind]||SH_COLS[kind]);}
 
 function shColsGuess(kind,aoa,base){
+  if(kind==="list")base=shListBase(aoa,base);
   const n=s=>String(s==null?"":s).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/\s+/g," ").trim();
   const words=SH_COL_WORDS[kind],fields=Object.keys(words);
   let best={hits:0,row:-1,map:{}};
@@ -505,6 +519,8 @@ function shColsGuess(kind,aoa,base){
       if(!map.sub&&eans.length){map.sub=colLetter(eans.shift());}
     }
     if(kind==="move"&&!map.code){const ci=(r||[]).findIndex((v,c)=>!used.has(c)&&typeof v==="string"&&/\bean\b|kod/.test(n(v)));if(ci>=0)map.code=colLetter(ci);}
+    // Hodnoty jako index „TOP“ nebo název „Držák urgent“ nejsou hlavička.
+    if(kind==="list"&&!map.ean&&!(map.name&&map.order))return;
     const hits=Object.keys(map).length;
     if(hits>best.hits)best={hits,row:ri,map};
   });

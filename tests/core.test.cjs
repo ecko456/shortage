@@ -73,3 +73,23 @@ test('Historie popíše změnu stavu a poznámky', () => {
 test('Excel export neutralizuje vzorce v textových buňkách', () => {
   assert.equal(core()(`return safeCell('=HYPERLINK("https://example.com")');`).startsWith("'="),true);
 });
+
+test('Urgenty A–S bez hlavičky načtou správné údaje včetně oddělení v S', () => {
+  const out=core()(seed+`const r=Array.from({length:19},()=>c(''));r[0]=c('000123',L('U.1'));r[1]=c('22.10.2026 8:00');r[2]=c('Držák');r[5]=c('OBJ77');r[6]=c('TOP');r[7]=c('12,5');r[18]=c('Brus Hala 2');return shBuild([r]).items[0];`);
+  assert.deepEqual([out.ean,out.name,out.order,out.index,out.qty,out.op,out.code],['000123','Držák','OBJ77','TOP','12,5','Brus Hala 2','U.1']);
+  assert.equal(out.top,false,'G je index, nikoli priorita TOP');
+});
+test('Mapování se přepne mezi A–S a Kooperací i po uložení opačného formátu', () => {
+  const out=core()(`const wide=[Array(19).fill('')],narrow=[Array(8).fill('')];return [shColsGuess('list',wide,SH_COLS.list).cols,shColsGuess('list',narrow,SH_URGENT_COLS).cols];`);
+  assert.deepEqual([out[0].ean,out[0].name,out[0].order,out[0].qty,out[0].op,out[0].top],['A','C','F','H','S','']);
+  assert.deepEqual([out[1].ean,out[1].order,out[1].qty,out[1].op],['C','A','E','H']);
+});
+test('Hlavičky urgentů rozpoznají oddělení a vlastní ruční mapování se zachová', () => {
+  const out=core()(`const head=Array(19).fill('');head[0]='EAN';head[2]='Název dílu';head[5]='Číslo objednávky';head[6]='Index';head[7]='Urgentní množství';head[18]='Oddělení kde v procesu';const custom={...SH_COLS.list,ean:'B',qty:'F'};return {guess:shColsGuess('list',[head],SH_COLS.list),custom:shColsGuess('list',[Array(19).fill('')],custom).cols};`);
+  assert.equal(out.guess.cols.op,'S');assert.equal(out.guess.cols.qty,'H');assert.equal(out.guess.header,0);
+  assert.equal(out.custom.ean,'B');assert.equal(out.custom.qty,'F');
+});
+test('Název s urgent a index TOP se nezamění za hlavičku bez nadpisů', () => {
+  const out=core()(`const r=Array(19).fill('');r[0]='0000555';r[2]='Držák urgent';r[5]='OBJ77';r[6]='TOP';r[7]='12,5';r[18]='Brus';return shColsGuess('list',[r],SH_COLS.list);`);
+  assert.equal(out.header,-1);assert.deepEqual(out.found,[]);assert.equal(out.cols.qty,'H');assert.equal(out.cols.top,'');
+});

@@ -9,7 +9,7 @@ on:
       tag:
         description: Verze vydání (například v1.0.0)
         required: true
-        default: v1.0.0
+        default: v1.1.0
         type: string
 permissions:
   contents: write
@@ -56,11 +56,11 @@ jobs:
 
           Stáhněte soubor .exe a spusťte jej. Instalace ani server nejsou potřeba. Balíček není digitálně podepsaný; Windows může při prvním spuštění zobrazit SmartScreen.
 
-          Import urgentních dílů z Kooperace Hala 2 (list Shortage, TOP/TOP2, Ctrl+V), výrobní plán, evidence pohybu, poddíly, oddělení, poznámky, stavy, PDF s QR kódy a rozbor do Excelu.
+          Import urgentů A–S (A EAN, C název, F objednávka, G index, H množství, S oddělení v procesu) i výstupu Kooperace Hala 2. Třetí krok Evidence pohybu je volitelný: tlačítko Přeskočit a vytvořit PDF rovnou vygeneruje urgenty. Dále výrobní plán, poddíly, priority, poznámky, stavy, PDF s QR kódy a rozbor do Excelu.
 
           Data a zálohy zůstávají v počítači v %APPDATA%\Shortage jako nešifrované JSON soubory. Automatické ukládání, posledních 20 předchozích uložených stavů a ruční záloha/obnova. Aplikace začíná prázdná a žádná data neodesílá na internet.
 
-          Prošlo 17 testů jádra/úložiště a průchod skutečným Electronem na Windows i Linuxu. Na Linuxu navíc ověřen český text a zpětné přečtení QR z PDF. Postup použití je v README repozitáře.
+          Prošly testy jádra/úložiště a průchod skutečným Electronem na Windows i Linuxu. Na Linuxu navíc ověřen český text a zpětné přečtení QR z PDF. Postup použití je v README repozitáře.
           NOTES
           printf '\nZdroj: `%s`. [Ověření na Windows](https://github.com/%s/actions/runs/%s).\n' "$SOURCE_SHA" "$GITHUB_REPOSITORY" "$SOURCE_RUN" >> notes.md
           gh release create "$RELEASE_TAG" "$package_file" SHA256SUMS.txt --repo "$GITHUB_REPOSITORY" --target "$SOURCE_SHA" --title "Shortage $app_version pro Windows" --notes-file notes.md --latest

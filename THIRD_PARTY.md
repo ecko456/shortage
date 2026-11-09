@@ -14,6 +14,7 @@ licenci pro vlastní aplikační kód; tento dokument mu novou licenci nepřidě
 Node a vazby do panelu ostatních modulů, přidán Electron a místní úložiště/zálohy.
 Opravena chybějící uvozovka atributu `class` v řádku poddílu a texty pro offline běh.
 Import sešitu z Kooperace přednostně vybírá list `Shortage` před kontrolním reportem.
+Verze 1.1 navíc podporuje tabulku urgentů A–S a přímé PDF bez evidence pohybu.
 Z původních stylů jsou odstraněny nepotřebné části ostatních pohledů.
 
 | Knihovna | Licence | Umístění licence |

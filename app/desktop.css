@@ -5,6 +5,8 @@
 #saveState { color: var(--ink-2); font-size: 12px; cursor: pointer; }
 #saveState[data-state=error] { color: var(--crit); font-weight: bold; }
 .desktop-main { max-width: 1800px; margin: auto; padding: 28px 24px 64px; }
+.sh-step[data-step="3"] { grid-template-columns: auto minmax(0, 1fr); }
+.sh-step-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 #view-shortage { display: block; }
 .local-history { list-style: none; padding: 0; }
 .local-history li { display: grid; grid-template-columns: 140px 1fr; gap: 16px; border-bottom: 1px solid var(--line); padding: 12px 0; }

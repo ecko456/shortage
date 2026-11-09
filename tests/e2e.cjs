@@ -70,6 +70,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   workbook(moves,[['Pohyb',X.utils.aoa_to_sheet([['QR kód','Datum a čas','Počet ks','Stav'],['A.1','22.10.2026 9:00',5,'Hotová kontrola'],['B.1','22.10.2026 9:30',10,'Broušení'],['B.2','22.10.2026 9:35',10,'Lakovna'],['B.3','22.10.2026 9:40',10,'Odesláno na WPA']])]]);
   await open();
   assert.match(await page.locator('#shView').innerText(),/Zatím žádný seznam/);
+  assert.equal(await page.locator('#shSkipMove').isDisabled(),true);
   await page.locator('#shFile').setInputFiles(urgent);
   await page.waitForFunction(()=>S.shortage.lists[0]?.items.length===3);
   assert.deepEqual(await page.evaluate(()=>shList().items.map(x=>x.ean)),['0000123','0000789','0000456']);
@@ -132,6 +133,31 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await page.locator('[data-shmanual]').first().click();await page.locator('#dlg[open]').waitFor();
   await page.locator('#dlg [name="name"]').fill('Ručně přidaný díl');await page.locator('#dlg [name="ean"]').fill('0000998');await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items.length===2);await saved();
+  // Široká tabulka urgentů bez hlavičky. Datum v B nesmí přepnout import na evidenci pohybu.
+  const wide=Array(19).fill('');wide[0]='0000555';wide[1]='22.10.2026 8:00';wide[2]='Držák urgent';wide[5]='OBJ77';wide[6]='TOP';wide[7]='12,5';wide[18]='Brus Hala 2';
+  await paste('',wide.join('\t'));
+  await page.waitForFunction(()=>S.shortage.lists.length===4);
+  assert.deepEqual(await page.evaluate(()=>{const i=shList().items[0];return [i.ean,i.name,i.order,i.index,i.qty,i.op,i.top];}),['0000555','Držák urgent','OBJ77','TOP','12,5','Brus Hala 2',false]);
+  assert.equal(await page.evaluate(()=>shList().moves),null);
+  assert.match(await page.locator('#shSt3').innerText(),/Volitelné/);
+  await download('#shSkipMove','urgenty-bez-evidence.pdf');
+  // HTML ze schránky musí zachovat odkaz u A i oddělení ze sloupce S.
+  const htmlWide='<table><tr>'+wide.map((v,i)=>'<td>'+(i===0?'<a href="https://erp.example/?activeBarcode=U.1">'+v+'</a>':v)+'</td>').join('')+'</tr></table>';
+  await paste(htmlWide,wide.join('\t'));await page.waitForFunction(()=>S.shortage.lists.length===5);
+  assert.equal(await page.evaluate(()=>shList().items[0].code),'U.1');
+  assert.equal(await page.evaluate(()=>shList().items[0].op),'Brus Hala 2');
+  const rawFile=path.join(resultDir,'urgenty-a-s.xlsx');
+  const rawHead=Array(19).fill('');rawHead[0]='EAN';rawHead[2]='Název dílu';rawHead[5]='Číslo objednávky';rawHead[6]='Index';rawHead[7]='Urgentní množství';rawHead[18]='Oddělení kde v procesu';
+  const rawRow=wide.slice();rawRow[0]=555;rawRow[5]='OBJ88';rawRow[6]='B';rawRow[7]=10;
+  const rawSheet=X.utils.aoa_to_sheet([rawHead,rawRow]);rawSheet.A2.z='0000000';rawSheet.A2.l={Target:'https://erp.example/?activeBarcode=U.2'};
+  workbook(rawFile,[['Urgenty',rawSheet]]);
+  await page.locator('#shFile').setInputFiles(rawFile);await page.waitForFunction(()=>S.shortage.lists.length===6);
+  assert.deepEqual(await page.evaluate(()=>{const i=shList().items[0];return [i.ean,i.order,i.qty,i.op,i.code];}),['0000555','OBJ88','10','Brus Hala 2','U.2']);
+  assert.equal(await page.evaluate(()=>shList().moves),null);assert.equal(await page.evaluate(()=>shList().plan),null);
+  const rawPdf=await download('#shSkipMove','urgenty-a-s.pdf');await saved();
+  assert.equal(await page.evaluate(()=>shList().moves),null);
+  await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(resultDir,'urgenty-a-s.png'),fullPage:true});
+  console.log('ok urgenty A–S: text, HTML, Excel a PDF bez kroku 3');
   await page.locator('#restore').click();await page.locator('#dlg[open]').waitFor();await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>S.shortage.lists.length===1 && $('#saveState').dataset.state==='saved');
   assert.equal(await page.evaluate(()=>shList().items[0].note),'Dodat do 10:00');
@@ -149,9 +175,11 @@ d=pymupdf.open(sys.argv[1]);p=d[0];r=p.search_for('A.1')[0];m=72/25.4
 box=pymupdf.Rect(r.x0-6*m,r.y0-17*m,r.x1+6*m,r.y1+m)
 pix=p.get_pixmap(matrix=pymupdf.Matrix(6,6),clip=box,alpha=False)
 open(sys.argv[2],'wb').write(pix.samples)
-print(json.dumps({'w':pix.width,'h':pix.height,'landscape':p.rect.width>p.rect.height,'text':' '.join(x.get_text() for x in d)}))`,pdf,path.join(resultDir,'qr.raw')],{encoding:'utf8'});
+raw=pymupdf.open(sys.argv[3])
+print(json.dumps({'w':pix.width,'h':pix.height,'landscape':p.rect.width>p.rect.height,'text':' '.join(x.get_text() for x in d),'raw':' '.join(x.get_text() for x in raw)}))`,pdf,path.join(resultDir,'qr.raw'),rawPdf],{encoding:'utf8'});
   if(py.status===0){
     const info=JSON.parse(py.stdout);assert.equal(info.landscape,true);assert.match(info.text.replace(/\s+/g,' '),/Dodat do 10:00/);
+    assert.match(info.raw,/OBJ88/);assert.match(info.raw,/Brus Hala 2/);assert.match(info.raw,/U\.2/);assert.match(info.raw,/0000555/);
     const rgb=await fs.readFile(path.join(resultDir,'qr.raw'));const rgba=new Uint8ClampedArray(info.w*info.h*4);
     for(let i=0;i<info.w*info.h;i++){rgba[i*4]=rgb[i*3];rgba[i*4+1]=rgb[i*3+1];rgba[i*4+2]=rgb[i*3+2];rgba[i*4+3]=255;}
     const qr=require('jsqr')(rgba,info.w,info.h);assert.ok(qr,'QR kód v PDF musí jít přečíst');assert.equal(qr.data,'A.1');

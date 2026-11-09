@@ -6,13 +6,16 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.0.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.1.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
 profilu Windows, takže přesunutí nebo výměna `.exe` souboru data nesmaže. Balíček
 není digitálně podepsaný; Windows může při prvním spuštění zobrazit upozornění
 SmartScreen. Aplikace nemá automatickou aktualizaci.
+
+Při aktualizaci zavři staré okno a spusť nový `.exe`. Dosavadní seznamy a zálohy
+zůstávají ve stejném profilu Windows.
 
 ## Co aplikace umí
 
@@ -22,6 +25,7 @@ SmartScreen. Aplikace nemá automatickou aktualizaci.
   včetně rychlého čtení velkých XLSX souborů.
 - **Evidence pohybu:** soubor Excelu, CSV/text nebo Ctrl+V; nejnovější záznam ke kódu,
   přidání poddílů z jiných operací, vynechání stavu „Odesláno na WPA“.
+  Krok je volitelný: tlačítko **Přeskočit a vytvořit PDF** rovnou vygeneruje urgenty.
 - **Úpravy:** poznámky, ruční přidání a odebrání položky, pořadí myší/klávesnicí,
   priority, stav položky, oddělení, hledání a filtry.
 - **Rozbor:** probíhající operace, poddíly a interní záznamy, doplnění prázdných
@@ -34,6 +38,25 @@ Sloupce souborů se rozpoznávají **místně podle hlavičky**, volbu lze ručn
 zapamatovat. Online AI byla odstraněna. Všechny knihovny i česká písma jsou přibalené.
 Aplikace neposílá data na internet. Odkazy z ERP uchovává jako podklad pro QR;
 online stránky ERP z této offline aplikace neotvírá.
+
+### Tabulka urgentů A–S
+
+V Excelu zkopíruj **celou oblast A–S**, i s mezilehlými sloupci, a vlož ji přes Ctrl+V.
+Funguje s hlavičkou i bez ní, jako HTML tabulka s odkazy nebo obyčejný text.
+Stejný formát jde načíst ze souboru Excelu.
+
+| Sloupec | Obsah |
+|---|---|
+| A | EAN (včetně odkazu pro QR, pokud je v buňce) |
+| C | Název dílu |
+| F | Číslo objednávky |
+| G | Index |
+| H | Urgentní množství |
+| S | Oddělení / operace v procesu |
+
+Sloupec G se u této tabulky čte jako index, nikoli jako priorita TOP. Prioritu můžeš
+zadat ručně nebo podle barev EANů. Oddělení ze sloupce S je vidět v seznamu i PDF.
+Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytvořit PDF**.
 
 ### Výstup z Kooperace Hala 2
 
