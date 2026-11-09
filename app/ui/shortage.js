@@ -292,9 +292,14 @@ async function shImportFile(file, force = false) {
     const idx = await shIndexedFills(bytes);
     Object.entries(idx).forEach(([name, map]) => { const ws = wb.Sheets[name]; if (ws) map.forEach((hex, ref) => { const c = ws[ref]; if (c && !(c.s && c.s.fgColor && c.s.fgColor.rgb)) c.s = { ...(c.s || {}), patternType: 'solid', fgColor: { rgb: hex } }; }); });
     const sheets = wb.SheetNames.map(name => ({ name, all: shSheetRows(X, wb.Sheets[name]) })).map(sh => ({ ...sh, rows: shTextRows(sh.all) }));
-    // list s nejvíc položkami podle uložených (výchozích) sloupců
-    let pick = 0, most = -1;
-    sheets.forEach((sh, i) => { const n = shBuild(sh.all, shColsGuess('list', sh.rows, shColsOf('list')).cols).items.length; if (n > most) { most = n; pick = i; } });
+    // Kooperace přidává i list Kontrola URGENTY: ten není seznamem dílů k importu.
+    // Pojmenovaný Shortage má přednost i tehdy, když je kontrolní report delší.
+    let pick = sheets.findIndex(sh => sh.name.trim().toLowerCase() === 'shortage');
+    if (pick < 0) {
+      pick = 0;
+      let most = -1;
+      sheets.forEach((sh, i) => { const n = shBuild(sh.all, shColsGuess('list', sh.rows, shColsOf('list')).cols).items.length; if (n > most) { most = n; pick = i; } });
+    }
     const how = await shColsFor('list', sheets, { file: file.name, pick, force });
     if (!how) return;
     const best = sheets[how.sheetI];

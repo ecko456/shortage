@@ -13,6 +13,7 @@ licenci pro vlastní aplikační kód; tento dokument mu novou licenci nepřidě
 Úpravy: odstraněna online AI a její závislosti, odstraněny nepoužité exporty pro
 Node a vazby do panelu ostatních modulů, přidán Electron a místní úložiště/zálohy.
 Opravena chybějící uvozovka atributu `class` v řádku poddílu a texty pro offline běh.
+Import sešitu z Kooperace přednostně vybírá list `Shortage` před kontrolním reportem.
 Z původních stylů jsou odstraněny nepotřebné části ostatních pohledů.
 
 | Knihovna | Licence | Umístění licence |

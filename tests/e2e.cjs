@@ -54,10 +54,12 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
     ['Číslo objednávky','Název dílu','EAN','Index','Urgentní množství','','TOP','Probíhající operace'],
     ['OBJ1','Držák',123,'A',5,'','TOP','Brush Hala 2'],
     ['OBJ2','Sestava',456,'A',10,'','','Frézování Hala 2'],
-    ['OBJ3','Kryt',789,'B',3,'','TOP 2','Kontrola'],
+    ['OBJ3','Kryt',789,'B',3,'','TOP2','Kontrola'],
   ]);
   for(let r=2;r<=4;r++){ws['C'+r].z='0000000';ws['C'+r].l={Target:'https://erp.example/item?activeBarcode=A.'+(r-1)};}
-  workbook(urgent,[['Urgenty',ws]]);
+  const control=X.utils.aoa_to_sheet([['Objednávka','Název','EAN','Index','Množství'],...Array.from({length:8},(_,i)=>['CH'+i,'Kontrolní řádek – neimportovat','999'+i,'X',1])]);
+  // Formát z Kooperace: skutečný seznam Shortage a delší diagnostika Kontrola URGENTY.
+  workbook(urgent,[['Shortage',ws],['Kontrola URGENTY',control]]);
   const planFile=path.join(resultDir,'plan.xlsx');
   const head=Array(39).fill('');head[0]='EAN sestavy';head[4]='EAN poddílu';head[7]='Index';head[12]='Číslo objednávky';head[38]='Probíhající operace';
   const rows=[head];
@@ -71,6 +73,8 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await page.locator('#shFile').setInputFiles(urgent);
   await page.waitForFunction(()=>S.shortage.lists[0]?.items.length===3);
   assert.deepEqual(await page.evaluate(()=>shList().items.map(x=>x.ean)),['0000123','0000789','0000456']);
+  assert.equal(await page.evaluate(()=>shList().sheet),'Shortage');
+  assert.equal(await page.evaluate(()=>shList().items[1].top2),true);
   await saved();
   console.log('ok import Excelu, EAN s nulami a priority');
   await page.locator('#shPlanFile').setInputFiles(planFile);
@@ -121,6 +125,10 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await paste('<table><tr><td>OBJ4</td><td>Barevný díl</td><td style="background-color:#FF0000"><a href="https://erp.example/?activeBarcode=C.1">0000999</a></td><td>A</td><td>8</td></tr></table>','OBJ4\tBarevný díl\t0000999\tA\t8');
   await page.locator('#dlg[open]').waitFor();assert.match(await page.locator('#dlgTitle').innerText(),/Barvy/);await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>S.shortage.lists.length===2);assert.equal(await page.evaluate(()=>shList().items[0].top),true);await saved();
+  await paste('<table><tr><td>OBJ5</td><td>Z Kooperace</td><td><a href="https://erp.example/?activeBarcode=C.2">0000997</a></td><td>B</td><td>6</td><td></td><td>TOP2</td><td>Brush Hala 2</td></tr></table>','OBJ5\tZ Kooperace\t0000997\tB\t6\t\tTOP2\tBrush Hala 2');
+  await page.waitForFunction(()=>S.shortage.lists.length===3);
+  assert.equal(await page.evaluate(()=>shList().items[0].top2),true);
+  assert.equal(await page.evaluate(()=>shList().items[0].code),'C.2');
   await page.locator('[data-shmanual]').first().click();await page.locator('#dlg[open]').waitFor();
   await page.locator('#dlg [name="name"]').fill('Ručně přidaný díl');await page.locator('#dlg [name="ean"]').fill('0000998');await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items.length===2);await saved();
@@ -129,7 +137,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   assert.equal(await page.evaluate(()=>shList().items[0].note),'Dodat do 10:00');
   assert.equal(await page.locator('#shMsg').innerText(),'');
   await page.locator('#history').click();await page.locator('#dlg[open]').waitFor();assert.match(await page.locator('#dlgBody').innerText(),/Shortage:/);await page.locator('#dlgOk').click();
-  console.log('ok schránka, barvy, ruční položka, záloha a obnova');
+  console.log('ok schránka z Kooperace (A–H bez hlavičky, TOP2), barvy, ruční položka, záloha a obnova');
   // Data i ovládací prvky zůstanou použitelné na menší obrazovce.
   await page.setViewportSize({width:1024,height:768});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(resultDir,'shortage-1024.png'),fullPage:true});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

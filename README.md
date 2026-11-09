@@ -35,6 +35,28 @@ zapamatovat. Online AI byla odstraněna. Všechny knihovny i česká písma jsou
 Aplikace neposílá data na internet. Odkazy z ERP uchovává jako podklad pro QR;
 online stránky ERP z této offline aplikace neotvírá.
 
+### Výstup z Kooperace Hala 2
+
+Načti `shortage_RRRR-MM-DD.xlsx`, případně v Kooperaci použij **Kopírovat shortage**
+a vlož tabulku do Shortage přes Ctrl+V. Import očekává:
+
+| Sloupec | Obsah |
+|---|---|
+| A | Číslo objednávky |
+| B | Název dílu |
+| C | EAN s hypertextovým odkazem obsahujícím `activeBarcode` |
+| D | Index (line) |
+| E | Urgentní množství |
+| F | Nevyužitý |
+| G | `TOP` nebo `TOP2` (případně `TOP 2`) |
+| H | Probíhající operace |
+
+V sešitu má přednost list **Shortage**, i když má druhý list **Kontrola URGENTY**
+více řádků. Sloupec I „Kde je“ je informativní a tento modul jej neimportuje.
+Kopie ze schránky funguje i bez hlavičky, pokud obsahuje HTML tabulku s odkazy u EANů.
+Kooperace nadále obstarává přípravu seznamu; tato aplikace ji nespouští a nemění její
+Google tabulku ani složku se záznamy.
+
 ## Data a zálohy
 
 - Ukládá se automaticky; horní lišta ukazuje „Uloženo v počítači“ nebo chybu zápisu.
