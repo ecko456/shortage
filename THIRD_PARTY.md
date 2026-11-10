@@ -34,3 +34,6 @@ výrobního plánu a poznámka od plánování ze sloupce S.
 
 Verze 1.3: všechny operace poddílů ihned v seznamu, ruční zdroj a doplnění poznámek,
 sekce nejednoznačných QR odkazů a editace položek/poddílů včetně exportů.
+
+Verze 1.4: aktualizace probíhajících operací z obou listů plánu, víceřádkové
+poznámky s automatickou výškou a tisk dlouhých poznámek přes více stran.

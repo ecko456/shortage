@@ -6,7 +6,7 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.3.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.4.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
@@ -30,7 +30,8 @@ zůstávají ve stejném profilu Windows.
 - **Úpravy:** poznámky, ruční přidání a odebrání položky, pořadí myší/klávesnicí,
   priority, stav položky, oddělení, hledání a filtry. Propiska vedle oka otevře
   editaci každé položky i poddílu: EAN, název, objednávka, index, množství, operace,
-  odkaz/QR, poznámka a stav. Ruční opravy poddílů se zachovají při novém načtení plánu.
+  odkaz/QR, poznámka a stav. Ruční opravy poddílů se zachovají při novém načtení plánu;
+  probíhající operace se znovu převezme z aktuálního plánu.
 - **Rozbor:** probíhající operace, poddíly a interní záznamy, doplnění prázdných
   poznámek a export do Excelu.
 - **PDF:** A4 na šířku, QR s hodnotou `activeBarcode`, kolonky pro stav v 10:00 a
@@ -78,7 +79,8 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
 
 ### Výrobní plán: dva různé listy
 
-- **První list – díly bez sestav:** nastavuje se jen sloupec **EAN dílu**.
+- **První list – díly bez sestav:** povinný je pouze sloupec **EAN dílu**.
+  Volitelně zvol sloupec **Probíhající operace**; pokud v listu není, nech „v souboru není“.
   Odkaz z jeho buňky doplní chybějící QR u urgentu, pokud je pro EAN jednoznačný.
   Už vyplněný odkaz ani kód se nepřepisuje. Pokud stejný EAN odkazuje na více různých
   kódů, položka se objeví nahoře v sekci **Nelze přidělit odkaz**. Propiskou vedle
@@ -94,6 +96,19 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
 Při prvním importu se ukážou dvě samostatná okna s náhledem a volba se zapamatuje.
 Tlačítkem **Upravit sloupce** lze nastavení znovu otevřít. Soubor jen s prvním listem
 se také načte; žádná pole sestavy po něm aplikace nepožaduje.
+
+### Aktuální operace a čitelné poznámky
+
+Sloupec se jmenuje **Oddělení / Probíhající operace**. Nový výrobní plán aktualizuje
+operace samostatných dílů z prvního listu a poddílů z druhého listu. Vlastní řádek
+sestavy v druhém listu může dodat také operaci sestavy. Změna se promítne do filtrů,
+automatického oddělení, PDF a rozboru do Excelu. Poslední záznam z evidence pohybu
+zůstává pod aktuální operací. Poznámky, stavy a ručně zvolené QR kódy zůstávají.
+
+Poznámky v tabulce jsou víceřádkové a automaticky se zvětší, aby byl vidět celý text.
+Ukládají se po opuštění pole nebo přes Ctrl+Enter. Také PDF tiskne celou poznámku;
+u velmi dlouhých poznámek pokračuje stejná položka na další stránce s označením
+„pokračování“.
 
 ### Výstup z Kooperace Hala 2
 

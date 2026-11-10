@@ -70,7 +70,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   const rows=[head];
   for(const [ean,op]of [['0000901','Brush Hala 2'],['0000902','Lakovna'],['0000903','Lakovna']]){const r=Array(39).fill('');r[0]='0000456';r[4]=ean;r[7]='A';r[12]='OBJ2';r[38]=op;rows.push(r);}
   const pws=X.utils.aoa_to_sheet(rows);for(let r=2;r<=4;r++)pws['E'+r].l={Target:'https://erp.example/?activeBarcode=B.'+(r-1)};
-  const dws=X.utils.aoa_to_sheet([['Popis','EAN dílu'],['Samostatný díl','0000123'],['Sestava v plánu','0000456']]);
+  const dws=X.utils.aoa_to_sheet([['Popis','EAN dílu','Probíhající operace'],['Samostatný díl','0000123','Vrtání Hala 2'],['Sestava v plánu','0000456','Montáž Hala 2']]);
   dws.B2.l={Target:'https://erp.example/?activeBarcode=A.1'};dws.B3.l={Target:'https://erp.example/?activeBarcode=A.2'};
   workbook(planFile,[['Díly',dws],['Poddíly',pws]]);
   const moves=path.join(resultDir,'pohyb.xlsx');
@@ -91,7 +91,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   console.log('ok import Excelu, EAN s nulami a priority');
   await page.locator('#shPlanFile').setInputFiles(planFile);
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
-  assert.equal(await page.locator('#dlg [data-shcol]').count(),1);assert.equal(await page.locator('#dlg [name="c-ean"]').inputValue(),'B');
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),2);assert.equal(await page.locator('#dlg [name="c-ean"]').inputValue(),'B');
   await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('2. list'));
   assert.equal(await page.locator('#dlg [name="c-asm"]').inputValue(),'A');assert.equal(await page.locator('#dlg [name="c-sub"]').inputValue(),'E');
@@ -103,7 +103,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await page.waitForFunction(()=>shList().items.find(x=>x.ean==='0000456')?.subs.length===3);
   assert.equal(await page.evaluate(()=>S.shortage.cols.planItem.ean),'B');assert.equal(await page.evaluate(()=>S.shortage.cols.plan.sheet),'Poddíly');
   const parity=await page.evaluate(async()=>{
-    const sig=p=>JSON.stringify([p.sheet,p.itemSheet,[...p.direct],[...p.rows],[...p.other],[...p.cands]]);
+    const sig=p=>JSON.stringify([p.sheet,p.itemSheet,[...p.direct],[...p.operations],[...p.rows],[...p.other],[...p.cands]]);
     const fast=sig(ui.sh.plan);window.SH_PLAN_SHEETJS=true;
     try{return fast===sig(await shPlanRead(ui.sh.last.plan.file,null,shc().cols.plan,shc().cols.planItem));}
     finally{delete window.SH_PLAN_SHEETJS;}
@@ -125,7 +125,18 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await page.locator('#dlg [name="st"]').selectOption('wait');await page.locator('#dlgOk').click();
   await page.waitForFunction(id=>shEntry(shList(),id).entry.code==='MAN.SUB',subId);
   await page.evaluate(()=>{shUsePlan(shList(),ui.sh.plan);save();renderShortage();});await saved();
-  assert.deepEqual(await page.evaluate(id=>{const s=shEntry(shList(),id).entry;return [s.ean,s.qty,s.op,s.note,s.st,s.rec];},subId),['0000888','7','Kontrola Hala 3','Poznámka poddílu','wait',null]);
+  assert.deepEqual(await page.evaluate(id=>{const s=shEntry(shList(),id).entry;return [s.ean,s.qty,s.op,s.note,s.st,s.rec];},subId),['0000888','7','Lakovna','Poznámka poddílu','wait',null]);
+  assert.equal(await page.evaluate(()=>shList().items[0].op),'Vrtání Hala 2');
+  assert.match(await page.locator('.sh-tab thead').innerText(),/Oddělení \/ Probíhající operace/i);
+  // Nový plán aktualizuje hlavní díl i ručně opravený poddíl, jeho ostatní údaje zůstanou.
+  dws.C2.v='Balení Hala 2';dws.C3.v='';pws.AM3.v='Kontrola Hala 4';
+  const updatedPlan=path.join(resultDir,'plan-aktualizovany.xlsx');workbook(updatedPlan,[['Díly',dws],['Poddíly',pws]]);
+  await page.locator('#shPlanFile').setInputFiles(updatedPlan);
+  await page.waitForFunction(()=>shList().items[0].op==='Balení Hala 2');
+  assert.equal(await page.evaluate(()=>shList().items.find(x=>x.ean==='0000456').op),'');
+  assert.equal(await page.evaluate(id=>shEntry(shList(),id).entry.op,subId),'Kontrola Hala 4');
+  assert.equal(await page.evaluate(id=>shEntry(shList(),id).entry.code,subId),'MAN.SUB');
+  assert.ok(await page.locator('.sh-ops').getByRole('button',{name:/Balení Hala 2/}).count());
   const first=await page.evaluate(()=>shList().items[0].id);
   await page.locator(`[data-shnote="${first}"]`).fill('Dodat do 10:00');
   await page.locator(`[data-shnote="${first}"]`).press('Tab');
@@ -206,7 +217,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   const one=path.join(resultDir,'plan-jen-dily.xlsx');const oneWs=X.utils.aoa_to_sheet([['','','','EAN dílu'],['','','','0000555']]);oneWs.D2.l={Target:'https://erp.example/?activeBarcode=U.0'};
   workbook(one,[['Jen díly',oneWs]]);await page.locator('#shPlanFile').setInputFiles(one);
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
-  assert.equal(await page.locator('#dlg [data-shcol]').count(),1);await page.locator('#dlgOk').click();
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),2);await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items[0].code==='U.0');
   assert.equal(await page.locator('#dlg[open]').count(),0);assert.equal(await page.evaluate(()=>shList().items[0].subs.length),0);
   assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');await saved();
@@ -254,6 +265,20 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   // Data i ovládací prvky zůstanou použitelné na menší obrazovce.
   await page.setViewportSize({width:1024,height:768});await page.evaluate(()=>scrollTo(0,0));await page.screenshot({path:path.join(resultDir,'shortage-1024.png'),fullPage:true});
   assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);
+  const longNote='Začátek poznámky. '+('Zkontrolovat rozměry a dodat všechny součásti do výroby. '.repeat(24))+'KONEC POZNÁMKY';
+  const noteField=page.locator(`[data-shnote="${first}"]`);
+  await noteField.fill(longNote);await noteField.press('Tab');await saved();
+  assert.equal(await noteField.evaluate(e=>e.tagName),'TEXTAREA');
+  assert.equal(await noteField.evaluate(e=>e.scrollHeight<=e.clientHeight+1),true);
+  assert.ok(await noteField.evaluate(e=>e.clientHeight)>200);
+  await page.locator('#shQ').fill('žádná shoda');await page.locator('#shQ').fill('');
+  assert.equal(await noteField.evaluate(e=>e.scrollHeight<=e.clientHeight+1),true);
+  await page.screenshot({path:path.join(resultDir,'cele-poznamky.png'),fullPage:true});
+  const notesPdf=await download('[data-shpdf]','cele-poznamky.pdf');
+  await page.reload();await page.waitForFunction(()=>typeof initialized!=='undefined'&&initialized);
+  assert.equal(await page.locator(`[data-shnote="${first}"]`).inputValue(),longNote);
+  assert.equal(await page.locator(`[data-shnote="${first}"]`).evaluate(e=>e.scrollHeight<=e.clientHeight+1),true);
+  console.log('ok obnova probíhajících operací a plné víceřádkové poznámky po restartu');
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
   console.log('ok žádné chyby JavaScriptu, žádné síťové požadavky');
   await app.close();app=null;
@@ -264,11 +289,14 @@ pix=p.get_pixmap(matrix=pymupdf.Matrix(6,6),clip=box,alpha=False)
 open(sys.argv[2],'wb').write(pix.samples)
 raw=pymupdf.open(sys.argv[3])
 edited=pymupdf.open(sys.argv[4])
-print(json.dumps({'w':pix.width,'h':pix.height,'landscape':p.rect.width>p.rect.height,'text':' '.join(x.get_text() for x in d),'raw':' '.join(x.get_text() for x in raw),'edited':' '.join(x.get_text() for x in edited)}))`,pdf,path.join(resultDir,'qr.raw'),rawPdf,editedPdf],{encoding:'utf8'});
+notes=pymupdf.open(sys.argv[5])
+print(json.dumps({'w':pix.width,'h':pix.height,'landscape':p.rect.width>p.rect.height,'text':' '.join(x.get_text() for x in d),'raw':' '.join(x.get_text() for x in raw),'edited':' '.join(x.get_text() for x in edited),'notes':' '.join(x.get_text() for x in notes),'noteBounds':all(b[3]<190*72/25.4+1 for page in notes for b in page.get_text('blocks') if b[1]<190*72/25.4)}))`,pdf,path.join(resultDir,'qr.raw'),rawPdf,editedPdf,notesPdf],{encoding:'utf8'});
   if(py.status===0){
     const info=JSON.parse(py.stdout);assert.equal(info.landscape,true);assert.match(info.text.replace(/\s+/g,' '),/Dodat do 10:00/);
     assert.match(info.text.replace(/\s+/g,' '),/Poddíl ručně/);assert.match(info.text.replace(/\s+/g,' '),/Poznámka poddílu/);
     assert.match(info.edited.replace(/\s+/g,' '),/Ručně upravený díl/);assert.match(info.edited,/Q\.2/);assert.match(info.edited.replace(/\s+/g,' '),/Dodat do pátku/);
+    assert.match(info.notes.replace(/\s+/g,' '),/KONEC POZNÁMKY/);assert.equal(info.noteBounds,true);assert.equal((info.notes.match(/Zkontrolovat/g)||[]).length,24);assert.equal((info.notes.match(/rozměry/g)||[]).length,24);
+    assert.match(info.text.replace(/\s+/g,' '),/Balení Hala 2/);
     assert.match(info.raw,/OBJ88/);assert.match(info.raw,/Brus Hala 2/);assert.match(info.raw,/U\.2/);assert.match(info.raw,/0000555/);
     assert.match(info.raw.replace(/\s+/g,' '),/Poznámka od plánování:/);
     const rgb=await fs.readFile(path.join(resultDir,'qr.raw'));const rgba=new Uint8ClampedArray(info.w*info.h*4);

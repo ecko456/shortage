@@ -405,10 +405,16 @@ function shPlanKeyPart(v){let s=String(v==null?"":v).replace(/\s+/g,"").toUpperC
 
 function shPlanKey(ean,index,order){return shPlanKeyPart(ean)+"|"+shPlanKeyPart(index)+"|"+shPlanKeyPart(order);}
 
-function shPlanBlank(file){return {file:String(file||"").slice(0,160),at:Date.now(),sheet:"",itemSheet:"",total:0,rows:new Map(),other:new Map(),cands:new Map(),direct:new Map()};}
+function shPlanBlank(file){return {file:String(file||"").slice(0,160),at:Date.now(),sheet:"",itemSheet:"",total:0,rows:new Map(),other:new Map(),cands:new Map(),direct:new Map(),operations:new Map()};}
 
-function shPlanDirectRow(plan,ean,link){
+function shPlanDirectRow(plan,ean,link,op){
   const key=shPlanKeyPart(ean),url=shLink(link),code=shCode(link);
+  if(key&&op!==undefined){
+    const value=String(op==null?'':op).replace(/[\u0000-\u001F\u007F]/g,' ').replace(/\s+/g,' ').trim().slice(0,300);
+    const ops=plan.operations.get(key)||[];
+    if(!ops.some(x=>x.code===code&&x.op===value))ops.push({code,op:value});
+    plan.operations.set(key,ops);
+  }
   if(!key||!code)return;
   const list=plan.direct.get(key)||[];
   if(!list.some(x=>x.code===code))list.push({link:url,code});
@@ -426,12 +432,13 @@ function shPlanRow(plan,a,e,h,m,op,link){
 function shWpa(state){return /odeslano na wpa/.test(shOpNorm(state));}
 
 function shApplyPlan(list,plan){
-  const out={items:0,subs:0,noCode:0,other:0,cands:0,changed:0,linked:0,ambiguous:0,truncated:0};
+  const out={items:0,subs:0,noCode:0,other:0,cands:0,changed:0,linked:0,ambiguous:0,truncated:0,operations:0};
   let selfOps=[];
+  let selfFound=false;
   const group=(rows,self)=>{
     const by=new Map();
     rows.forEach(r=>{
-      if(shPlanKeyPart(r.ean)===self){if(r.op&&!selfOps.includes(r.op))selfOps.push(r.op);return;}   // sestava sama sebe není poddíl, její operace do rozboru (2.61)
+      if(shPlanKeyPart(r.ean)===self){selfFound=true;if(r.op&&!selfOps.includes(r.op))selfOps.push(r.op);return;}
       const key=shPlanKeyPart(r.ean)+"|"+r.code,x=by.get(key);
       if(x){if(r.op&&!x.ops.includes(r.op))x.ops.push(r.op);if(!x.link&&r.link)x.link=r.link;}
       else by.set(key,{ean:r.ean,link:r.link,code:r.code,ops:r.op?[r.op]:[]});
@@ -448,13 +455,23 @@ function shApplyPlan(list,plan){
     }
     const k=shPlanKey(it.ean,it.index,it.order),rows=[...(plan.rows.get(k)||[]),...((plan.cands&&plan.cands.get(k))||[])],self=shPlanKeyPart(it.ean);
     selfOps=[];
+    selfFound=false;
     const by=group(rows,self);
     it.pop=selfOps.join(" · ").slice(0,300);
+    const candidates=plan.operations?.get(self)||[];
+    const exact=it.code?candidates.filter(x=>x.code===it.code):[];
+    if(candidates.length||selfFound){
+      const ops=candidates.length?[...new Set((exact.length?exact:candidates).map(x=>x.op).filter(Boolean))]:selfOps;
+      const next=ops.join(' · ').slice(0,300);
+      if(next!==(it.op||''))out.operations++;
+      it.op=next;
+    }
     out.truncated+=Math.max(0,by.size-SH_MAX_SUBS);
     const old=new Map((it.subs||[]).map(s=>[s.sourceKey||shPlanKeyPart(s.ean)+"|"+s.code,s]));
     const subs=[...by.entries()].slice(0,SH_MAX_SUBS).map(([key,x])=>{
       const p=old.get(key);
-      if(p&&p.manual)return {...p};
+      if(p&&p.op!==x.ops.join(' · '))out.operations++;
+      if(p&&p.manual)return {...p,op:x.ops.join(' · ')};
       return {...(p||{}),id:p?p.id:"",ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · "),note:p?p.note:"",rec:p?p.rec:null,byRec:!!(p&&p.byRec),pdfHide:!!(p&&p.pdfHide)};
     });
     // Ručně opravené poddíly zachovat i po změně EANu nebo kódu v plánu.
@@ -479,7 +496,7 @@ function shEntry(list,id){
 
 const SH_COLS={
   list:{order:"A",name:"B",ean:"C",index:"D",qty:"E",top:"G",op:"H",note:""},
-  planItem:{ean:"A"},
+  planItem:{ean:"A",op:""},
   plan:{asm:"A",sub:"E",index:"H",order:"M",op:"AM"},
   move:{code:"A",when:"B",qty:"C",state:"D",op:""},
 };
@@ -502,14 +519,14 @@ const SH_COL_NEED={list:["ean"],planItem:["ean"],plan:["asm","sub"],move:["code"
 
 const SH_COL_NAMES={
   list:{order:"Číslo objednávky",name:"Název dílu",ean:"EAN (s odkazem, barva = TOP)",index:"Index",qty:"Urgentní množství",top:"TOP (text)",op:"Oddělení / operace v procesu",note:"Poznámka od plánování"},
-  planItem:{ean:"EAN dílu (s odkazem)"},
+  planItem:{ean:"EAN dílu (s odkazem)",op:"Probíhající operace (volitelné)"},
   plan:{asm:"EAN sestavy",sub:"EAN poddílu (s odkazem)",index:"Index",order:"Číslo objednávky",op:"Probíhající operace"},
   move:{code:"QR kód",when:"Datum a čas",qty:"Počet ks",state:"Stav",op:"Operace / pracoviště"},
 };
 
 const SH_COL_WORDS={
   list:{order:/objedn|zakaz/,name:/nazev|popis|^dil\b/,ean:/\bean\b|carov/,index:/^index|^idx/,qty:/mnozstv|urgent|^ks\b|pocet/,top:/^top\b|priorit/,op:/operac|probih|oddeleni|kde.*proces/,note:/poznam|planovan/},
-  planItem:{ean:/\bean\b|carov/},
+  planItem:{ean:/\bean\b|carov/,op:/probih|operac/},
   plan:{asm:/sestav/,sub:/poddil|komponent/,index:/^index|^idx/,order:/objedn|zakaz/,op:/probih|operac/},
   move:{code:/\bqr\b|barcode|^kod/,when:/datum|\bcas\b|time/,qty:/\bks\b|mnozstv|pocet/,state:/stav|status|udalost/,op:/operac|pracovist/},
 };

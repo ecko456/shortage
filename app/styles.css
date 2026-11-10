@@ -699,7 +699,7 @@ table.sh-tab th.sh-gripc, table.sh-tab td.sh-gripc { width: 30px; padding-left: 
 .sh-grip:hover, .sh-grip:focus-visible { background: var(--surface-3); color: var(--ink); }
 .sh-grip .icon { width: 16px; height: 16px; }
 @media (pointer: fine) { table.sh-tab:not(.sh-nodrag) tbody tr { cursor: grab; user-select: none; } }
-table.sh-tab tbody tr input { cursor: text; user-select: text; }
+table.sh-tab tbody tr input, table.sh-tab tbody tr textarea { cursor: text; user-select: text; }
 table.sh-tab.sh-nodrag .sh-grip { visibility: hidden; }
 body.sh-drag, body.sh-drag * { cursor: grabbing !important; user-select: none !important; }
 table.sh-tab tr.sh-dragging td { opacity: .45; background: var(--acc-soft); }
@@ -709,7 +709,7 @@ table.sh-tab td.sh-opc { min-width: 130px; }
 .sh-rec { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; margin-top: 6px; font-size: 13px; }
 .tag.sh-state { background: var(--surface-3); color: var(--ink); font-weight: 700; white-space: normal; overflow-wrap: anywhere; max-width: 100%; text-align: left; border-radius: 8px; }
 table.sh-tab td.sh-notec { min-width: 150px; }
-.sh-note { width: 100%; min-width: 130px; min-height: 34px; padding: 6px 9px; font-size: 13.5px; }
+.sh-note { display: block; box-sizing: border-box; width: 100%; min-width: 130px; min-height: 54px; padding: 6px 9px; font-size: 13.5px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; overflow: hidden; resize: none; }
 table.sh-tab td.sh-actc, table.sh-tab th.sh-actc { width: 96px; text-align: right; }
 .sh-hint { margin: -4px 0 10px; }
 /* poddíly z výrobního plánu (2.29) */

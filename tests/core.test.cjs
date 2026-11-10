@@ -97,9 +97,9 @@ test('Sloupec S je i poznámka od plánování, staré uložené mapování ji n
   const out=core()(seed+`const r=Array.from({length:19},()=>c(''));r[0]=c('001');r[2]=c('Držák');r[18]=c('Dodržet termín 10:00');const old={order:'F',name:'C',ean:'A',index:'G',qty:'H',top:'',op:'S'};const cols=shColsGuess('list',[r.map(x=>x.text)],old).cols;return {item:shBuild([r],cols).items[0],blank:shPlanningNote('  '),long:cleanShortage({lists:[{id:'sh1',items:[{ean:'1',note:shPlanningNote('x'.repeat(700))}]}]}).lists[0].items[0].note};`);
   assert.equal(out.item.note,'Poznámka od plánování: Dodržet termín 10:00');assert.equal(out.item.op,'Dodržet termín 10:00');assert.equal(out.blank,'');assert.equal(out.long,'Poznámka od plánování: '+'x'.repeat(700));
 });
-test('První list výrobního plánu definuje jen EAN a nastavení se uloží zvlášť', () => {
+test('První list plánu vyžaduje pouze EAN a nabízí volitelnou operaci', () => {
   const out=core()(`return {fields:Object.keys(SH_COL_NAMES.planItem),guess:shColsGuess('planItem',[['Popis','EAN dílu']],SH_COLS.planItem),saved:cleanShortage({cols:{planItem:{ean:'B',sheet:'Díly'},plan:{asm:'A',sub:'E',sheet:'Sestavy'}}}).cols};`);
-  assert.deepEqual(out.fields,['ean']);assert.equal(out.guess.cols.ean,'B');assert.equal(out.guess.header,0);assert.equal(out.saved.planItem.ean,'B');assert.equal(out.saved.plan.sheet,'Sestavy');
+  assert.deepEqual(out.fields,['ean','op']);assert.equal(out.guess.cols.ean,'B');assert.equal(out.guess.header,0);assert.equal(out.saved.planItem.ean,'B');assert.equal(out.saved.plan.sheet,'Sestavy');
 });
 test('První list doplní pouze jednoznačný QR kód a zachová odkazy i poznámky', () => {
   const out=core()(seed+`const p=shPlanBlank('p.xlsx');shPlanDirectRow(p,'001',L('D.1'));shPlanDirectRow(p,'1',L('D.1'));shPlanDirectRow(p,'2',L('D.2'));shPlanDirectRow(p,'2',L('D.3'));const l={items:[{ean:'1',note:'Ručně',subs:[]},{ean:'2',code:'OWN',link:L('OWN'),subs:[]},{ean:'2',code:'',subs:[]}]};const r=shApplyPlan(l,p);return {r,items:l.items};`);
@@ -126,4 +126,13 @@ test('Nejednoznačné QR volby přežijí uložení a nebezpečné odkazy se ods
 test('Všech 80 poddílů mimo Halu 2 se doplní hned a zachová po uložení', () => {
   const out=core()(seed+`const p=shPlanBlank('p');for(let n=0;n<80;n++)shPlanRow(p,'1','X'+n,'A','O','Lakovna',L('B.'+n));const l={items:[{ean:'1',index:'A',order:'O'}]};shApplyPlan(l,p);return cleanShortage({lists:[l]}).lists[0].items[0];`);
   assert.equal(out.subs.length,80);assert.equal(out.cands.length,0);
+});
+
+test('Aktuální plán obnoví operace i bez QR, nezmění poznámky ani vybraný QR odkaz', () => {
+  const out=core()(seed+`const l={items:[{ean:'1',code:'KEEP',link:L('KEEP'),op:'Původní',note:'Zachovat'},{ean:'2',op:'Staré'}]};const p=shPlanBlank('p');shPlanDirectRow(p,'1',L('OTHER'),'Jiná větev');shPlanDirectRow(p,'1',L('KEEP'),'Broušení');shPlanDirectRow(p,'2','','Lakovna');shApplyPlan(l,p);const next=shPlanBlank('nový');shPlanDirectRow(next,'1',L('KEEP'),'Kontrola');shPlanDirectRow(next,'2','','');shApplyPlan(l,next);return l.items;`);
+  assert.equal(out[0].op,'Kontrola');assert.equal(out[0].code,'KEEP');assert.equal(out[0].note,'Zachovat');assert.equal(out[1].op,'');
+});
+test('Operace sestavy z vlastního řádku a ručně upraveného poddílu se aktualizují', () => {
+  const out=core()(seed+`const l={items:[{ean:'1',index:'A',order:'O',op:'Stará',subs:[{id:'s',ean:'9',code:'MAN',manual:true,sourceKey:'2|B.2',note:'Ručně',op:'Ručně stará'}]}]};const p=shPlanBlank('p');shPlanRow(p,'1','1','A','O','Montáž',L('A.1'));shPlanRow(p,'1','2','A','O','Balení',L('B.2'));shApplyPlan(l,p);return l.items[0];`);
+  assert.equal(out.op,'Montáž');assert.equal(out.subs[0].op,'Balení');assert.equal(out.subs[0].code,'MAN');assert.equal(out.subs[0].note,'Ručně');
 });

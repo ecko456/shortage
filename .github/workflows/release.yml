@@ -9,7 +9,7 @@ on:
       tag:
         description: Verze vydání (například v1.0.0)
         required: true
-        default: v1.3.0
+        default: v1.4.0
         type: string
 permissions:
   contents: write
@@ -56,7 +56,7 @@ jobs:
 
           Stáhněte soubor .exe a spusťte jej. Instalace ani server nejsou potřeba. Balíček není digitálně podepsaný; Windows může při prvním spuštění zobrazit SmartScreen.
 
-          Poddíly se doplňují hned pro všechny probíhající operace, i bez posledního záznamu. Staré čekající poddíly se také zobrazí. Před importem urgentů lze ručně vybrat sloupec pro poznámku od plánování; tlačítko Doplnit poznámky z Excelu je doplní do rozpracovaného seznamu. EANy s více QR odkazy jsou nahoře v sekci Nelze přidělit odkaz. Propiska vedle oka upravuje každou položku i poddíl a nabídne výběr nalezeného odkazu nebo vlastní QR kód.
+          Sloupec Oddělení / Probíhající operace přebírá aktuální operace z nahraného výrobního plánu. První list nabízí vedle povinného EANu také volitelný sloupec Probíhající operace; druhý list aktualizuje operace poddílů. Operace se promítnou do filtrů a exportů. Poznámky jsou víceřádkové a automaticky zvětšují své pole, aby byly čitelné celé. V PDF se dlouhé poznámky nezkracují a mohou pokračovat na další stránce.
 
           Zachované funkce: Vložit ze schránky, výrobní plán s prvním listem dílů a druhým listem sestav/poddílů, volitelná evidence pohybu, priority, oddělení, PDF s QR a rozbor do Excelu. Ruční opravy se ukládají místně a promítají do exportů. Při aktualizaci zavřete staré okno a spusťte nový soubor .exe. Dosavadní data zůstanou zachována.
 
