@@ -6,7 +6,7 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.4.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.5.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
@@ -84,8 +84,11 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
   Odkaz z jeho buňky doplní chybějící QR u urgentu, pokud je pro EAN jednoznačný.
   Už vyplněný odkaz ani kód se nepřepisuje. Pokud stejný EAN odkazuje na více různých
   kódů, položka se objeví nahoře v sekci **Nelze přidělit odkaz**. Propiskou vedle
-  oka vyber jeden z nalezených odkazů, nebo vyplň vlastní odkaz či QR kód. Po uložení
-  se vyřešená položka vrátí do běžného seznamu. Volby zůstanou dostupné i po restartu.
+  oka lze vyplnit vlastní odkaz či QR kód. Přímo u položky je také nabídka **Varianta
+  QR odkazu**: každá možnost obsahuje QR kód, probíhající operaci a dostupný interní
+  záznam (stav, množství a čas). Pokud záznam chybí, je uvedeno „nenahrán“.
+  Výběr přiřadí odpovídající odkaz, operaci i záznam a vyřešená položka se vrátí
+  do běžného seznamu. Nabídka zůstává dostupná pro změnu volby i po restartu.
 - **Druhý list – sestavy a poddíly:** nastavuje se **EAN sestavy** a **EAN poddílu**,
   případně index, objednávka a probíhající operace. Platí pouze pro druhý list.
   Doplní se poddíly **všech operací**, včetně dílů bez odkazu; následně je můžeš
@@ -96,6 +99,16 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
 Při prvním importu se ukážou dvě samostatná okna s náhledem a volba se zapamatuje.
 Tlačítkem **Upravit sloupce** lze nastavení znovu otevřít. Soubor jen s prvním listem
 se také načte; žádná pole sestavy po něm aplikace nepožaduje.
+
+### QR varianty a interní záznamy
+
+Operace u variant pocházejí z výrobního plánu; interní záznamy z nahrané evidence
+pohybu. Pro doplnění údajů do starších seznamů nahraj plán a případně evidenci znovu.
+Evidenci můžeš nahrát před plánem i po něm. Záznamy se ukládají místně k danému
+seznamu i pro zatím nepřiřazené QR kódy. Starší záznam nepřepíše novější. Limit je
+20 000 uložených kódů na seznam, překročení import oznámí a ponechá nejnovější.
+
+Stejné informace o variantách jsou i v nabídce odkazů při editaci propiskou.
 
 ### Aktuální operace a čitelné poznámky
 

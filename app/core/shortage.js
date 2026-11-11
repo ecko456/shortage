@@ -15,6 +15,9 @@ const SH_MAX_DEPT_OPS=100;
 const SH_MAX_GONE=1000;
 
 const SH_MAX_NOTE=2000;
+const SH_MAX_RECORDS=20000;
+
+const shCleanLine=(v,max)=>String(v==null?'':v).replace(/[\u0000-\u001F\u007F]/g,' ').replace(/\s+/g,' ').trim().slice(0,max);
 
 function shPlanningNote(value){
   const text=String(value==null?"":value).replace(/[\u0000-\u001F\u007F]/g," ").replace(/\s+/g," ").trim();
@@ -23,8 +26,28 @@ function shPlanningNote(value){
 
 function shQrChoices(values){
   const out=[];
-  (Array.isArray(values)?values:[]).slice(0,100).forEach(v=>{const link=shLink(v&&v.link),code=shCode(link);if(code&&!out.some(x=>x.code===code))out.push({link,code});});
+  (Array.isArray(values)?values:[]).slice(0,100).forEach(v=>{
+    const link=shLink(v&&v.link),code=shCode(link);
+    if(code&&!out.some(x=>x.code===code))out.push({link,code,op:shCleanLine(v.op,300),rec:shRecClean(v.rec,shCleanLine)});
+  });
   return out;
+}
+
+function shRecordMap(list){
+  const out=new Map();
+  const add=(code,rec)=>{if(!code||!rec)return;const old=out.get(code);if(!old||!(old.ts&&rec.ts&&rec.ts<old.ts))out.set(code,rec);};
+  (list.records||[]).forEach(r=>add(r.code,r));
+  (list.items||[]).forEach(it=>{add(it.code,it.rec);(it.subs||[]).forEach(x=>add(x.code,x.rec));(it.qrChoices||[]).forEach(x=>add(x.code,x.rec));});
+  return out;
+}
+
+function shSelectQr(list,id,code){
+  const item=shEntry(list,id)?.entry,choice=item?.qrChoices?.find(x=>x.code===code);
+  if(!choice)return false;
+  const record=shRecordMap(list).get(code)||choice.rec||null;
+  item.link=choice.link;item.code=choice.code;item.op=choice.op||'';
+  item.rec=record?{...record}:null;
+  return true;
 }
 
 function shAllSubs(item){
@@ -139,10 +162,15 @@ function shRecBuild(rows,cols){
 
 function shApplyRecs(list,recs,meta){
   const by=new Map();
-  list.items.forEach(it=>[it,...(it.subs||[])].forEach(i=>{if(i.code){if(!by.has(i.code))by.set(i.code,[]);by.get(i.code).push(i);}}));
-  const out={matched:0,updated:0,same:0,older:0,added:0,wpa:0,missing:[]};
+  list.items.forEach(it=>[it,...(it.subs||[]),...(it.qrChoices||[])].forEach(i=>{if(i.code){if(!by.has(i.code))by.set(i.code,[]);by.get(i.code).push(i);}}));
+  const saved=shRecordMap(list);
+  const out={matched:0,updated:0,same:0,older:0,added:0,wpa:0,missing:[],cached:0,truncated:0};
   const stamp=r=>({...r,at:(meta&&meta.at)||Date.now(),by:String((meta&&meta.by)||"").slice(0,60)});
   recs.forEach((r,code)=>{
+    const previous=saved.get(code);
+    if(!previous||!(previous.ts&&r.ts&&r.ts<previous.ts)){
+      saved.set(code,{...stamp(r),code});out.cached++;
+    }
     const items=by.get(code);
     if(!items){out.missing.push(code);return;}
     out.matched++;
@@ -154,6 +182,9 @@ function shApplyRecs(list,recs,meta){
       out.updated++;
     });
   });
+  const entries=[...saved.entries()].sort((a,b)=>(b[1].ts||0)-(a[1].ts||0));
+  out.truncated=Math.max(0,entries.length-SH_MAX_RECORDS);
+  list.records=entries.slice(0,SH_MAX_RECORDS).map(([code,r])=>({...r,code}));
   return out;
 }
 
@@ -289,6 +320,7 @@ function cleanShortage(o){
     plan:l.plan&&typeof l.plan==="object"?{file:line(l.plan.file,160),at:num(l.plan.at),by:line(l.plan.by,60)}:null,
     // evidence pohybu (2.61, 3. krok): odkud jsou poslední záznamy
     moves:meta(l.moves),
+    records:(Array.isArray(l.records)?l.records:[]).slice(0,SH_MAX_RECORDS).filter(r=>r&&shCodeClean(r.code)).map(r=>({...shRecClean(r,line),code:shCodeClean(r.code)})),
     // ručně odebrané položky (2.36): při doplnění chybějících se samy nevrátí
     gone:[...new Set((Array.isArray(l.gone)?l.gone:[]).filter(k=>typeof k==="string"&&k).map(k=>k.slice(0,240)))].slice(-SH_MAX_GONE),
     // seznam ze 2.27 nemá top, op ani code: kód se dopočítá z odkazu; seznam ze 2.27.1 nemá id, note ani rec; ze 2.28 nemá subs
@@ -435,6 +467,7 @@ function shApplyPlan(list,plan){
   const out={items:0,subs:0,noCode:0,other:0,cands:0,changed:0,linked:0,ambiguous:0,truncated:0,operations:0};
   let selfOps=[];
   let selfFound=false;
+  const records=shRecordMap(list);
   const group=(rows,self)=>{
     const by=new Map();
     rows.forEach(r=>{
@@ -446,13 +479,17 @@ function shApplyPlan(list,plan){
     return by;
   };
   list.items.forEach(it=>{
+    const matches=plan.direct?.get(shPlanKeyPart(it.ean))||[];
     // První list nemá sestavy. Chybějící QR doplnit jen pro jednoznačný EAN.
     if(!it.code&&plan.direct){
-      const matches=plan.direct.get(shPlanKeyPart(it.ean))||[];
       if(matches.length===1){it.link=matches[0].link;it.code=matches[0].code;out.linked++;}
       else if(matches.length>1)out.ambiguous++;
-      it.qrChoices=matches.length>1?shQrChoices(matches):[];
     }
+    it.qrChoices=matches.length>1?shQrChoices(matches.map(x=>({...x,
+      op:[...new Set((plan.operations?.get(shPlanKeyPart(it.ean))||[]).filter(v=>v.code===x.code).map(v=>v.op).filter(Boolean))].join(' · '),
+      rec:records.get(x.code)||null,
+    }))):[];
+    if(it.code&&records.has(it.code))it.rec={...records.get(it.code)};
     const k=shPlanKey(it.ean,it.index,it.order),rows=[...(plan.rows.get(k)||[]),...((plan.cands&&plan.cands.get(k))||[])],self=shPlanKeyPart(it.ean);
     selfOps=[];
     selfFound=false;
@@ -471,8 +508,8 @@ function shApplyPlan(list,plan){
     const subs=[...by.entries()].slice(0,SH_MAX_SUBS).map(([key,x])=>{
       const p=old.get(key);
       if(p&&p.op!==x.ops.join(' · '))out.operations++;
-      if(p&&p.manual)return {...p,op:x.ops.join(' · ')};
-      return {...(p||{}),id:p?p.id:"",ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · "),note:p?p.note:"",rec:p?p.rec:null,byRec:!!(p&&p.byRec),pdfHide:!!(p&&p.pdfHide)};
+      if(p&&p.manual)return {...p,op:x.ops.join(' · '),rec:records.get(p.code)||p.rec||null};
+      return {...(p||{}),id:p?p.id:"",ean:x.ean,link:x.link,code:x.code,op:x.ops.join(" · "),note:p?p.note:"",rec:records.get(x.code)||(p?p.rec:null),byRec:!!(p&&p.byRec),pdfHide:!!(p&&p.pdfHide)};
     });
     // Ručně opravené poddíly zachovat i po změně EANu nebo kódu v plánu.
     old.forEach((p,key)=>{if(p.manual&&!by.has(key)&&subs.length<SH_MAX_SUBS)subs.push({...p});});

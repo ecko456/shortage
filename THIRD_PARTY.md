@@ -37,3 +37,6 @@ sekce nejednoznačných QR odkazů a editace položek/poddílů včetně export�
 
 Verze 1.4: aktualizace probíhajících operací z obou listů plánu, víceřádkové
 poznámky s automatickou výškou a tisk dlouhých poznámek přes více stran.
+
+Verze 1.5: přímý výběr QR variant s operací a interním záznamem; místní uchování
+záznamů nepřiřazených QR kódů pro pozdější načtení plánu a výběr varianty.

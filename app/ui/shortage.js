@@ -425,18 +425,19 @@ function shPasteRecs(rows, src = {}) {
   }
   const res = shApplyRecs(l, r.recs, { at: Date.now(), by: ui.me.label || '' });
   // 3. krok (2.61): odkud jsou záznamy
-  if (res.matched) l.moves = { file: (src.file || 'vloženo ze schránky').slice(0, 160), at: Date.now(), by: ui.me.label || '', rows: r.rows };
+  if (res.matched || res.cached) l.moves = { file: (src.file || 'vloženo ze schránky').slice(0, 160), at: Date.now(), by: ui.me.label || '', rows: r.rows };
   S.shortage = cleanShortage(S.shortage);   // id nově přidaných poddílů, sloupce
-  if (res.updated || res.added || res.matched) save();
+  if (res.updated || res.added || res.matched || res.cached) save();
   renderShortage();
   const other = !res.matched ? shc().lists.find(x => x !== l && x.items.some(i => i.code && r.recs.has(i.code))) : null;
   const miss = res.missing.slice(0, 5).join(', ') + (res.missing.length > 5 ? ` a ${res.missing.length - 5} dalších` : '');
-  const what = [res.updated ? `nový záznam u <b>${res.updated} ${res.updated === 1 ? 'položky' : 'položek'}</b>` : '', res.added ? `podle záznamu přidán${res.added === 1 ? '' : 'o'} <b>${res.added} ${shSubsN(res.added)}</b> s jinou operací` : ''].filter(Boolean).join(', ');
-  msg.innerHTML = `<div class="note ${res.updated || res.added ? 'i' : 'w'}">Poslední záznamy k seznamu z <b>${esc(shWhen(l))}</b>: ${what || 'žádná položka se nezměnila'}.</div>${[
+  const what = [res.cached ? `uloženo <b>${res.cached} záznamů</b> také pro možné QR varianty` : '', res.updated ? `<b>${res.updated} aktualizovaných záznamů u položek a QR variant</b>` : '', res.added ? `podle záznamu přidán${res.added === 1 ? '' : 'o'} <b>${res.added} ${shSubsN(res.added)}</b> s jinou operací` : ''].filter(Boolean).join(', ');
+  msg.innerHTML = `<div class="note ${res.updated || res.added || res.cached ? 'i' : 'w'}">Poslední záznamy k seznamu z <b>${esc(shWhen(l))}</b>: ${what || 'žádná položka se nezměnila'}.</div>${[
+    res.truncated ? `${res.truncated} nejstarších záznamů přesahuje limit ${SH_MAX_RECORDS} uložených záznamů na seznam.` : '',
     res.wpa ? `${res.wpa} ${res.wpa === 1 ? 'poddíl má' : res.wpa <= 4 ? 'poddíly mají' : 'poddílů má'} záznam „Odesláno na WPA“, ${res.wpa === 1 ? 'nepřidal se' : 'nepřidaly se'}.` : '',
     res.same ? `${res.same} ${shPl(res.same, 'položka má', 'položky mají', 'položek má')} stejný záznam, beze změny.` : '',
     res.older ? `${res.older} ${shPl(res.older, 'vložený záznam je starší', 'vložené záznamy jsou starší', 'vložených záznamů je starších')} než uložený, ${res.older === 1 ? 'nepoužil se' : 'nepoužily se'}.` : '',
-    res.missing.length ? `${res.missing.length} ${shPl(res.missing.length, 'kód v seznamu není', 'kódy v seznamu nejsou', 'kódů v seznamu není')}: ${miss}.` : '',
+    res.missing.length ? `${res.missing.length} ${shPl(res.missing.length, 'kód zatím není přiřazený položce', 'kódy zatím nejsou přiřazené položkám', 'kódů zatím není přiřazených položkám')}: ${miss}.` : '',
     other ? `Kódy patří k seznamu z ${shWhen(other)}. Otevři ho dole v Seznamech a vlož záznamy znovu.` : '',
     r.bad ? `${r.bad} ${shPl(r.bad, 'řádek nemá', 'řádky nemají', 'řádků nemá')} platný QR kód ve sloupci ${esc((src.cols && src.cols.cols.code) || 'A')}.` : '',
   ].filter(Boolean).map(t => `<div class="note w">${esc(t)}</div>`).join('')}${shColsNote('move', src.cols)}`;
@@ -577,7 +578,7 @@ function shUsePlan(l, plan) {
   const copy = JSON.parse(JSON.stringify(l));
   const res = shApplyPlan(copy, plan);
   if (!res.items && l.items.some(i => (i.subs || []).length)) {
-    l.items.forEach((it,i) => { it.link=copy.items[i].link; it.code=copy.items[i].code; it.qrChoices=copy.items[i].qrChoices; it.op=copy.items[i].op; it.pop=copy.items[i].pop; });
+    l.items.forEach((it,i) => { it.link=copy.items[i].link; it.code=copy.items[i].code; it.qrChoices=copy.items[i].qrChoices; it.op=copy.items[i].op; it.pop=copy.items[i].pop; it.rec=copy.items[i].rec; });
     return { ...res, kept: true };
   }
   l.items = copy.items;
@@ -597,7 +598,7 @@ function shPlanNote(res, plan, auto) {
     res.truncated ? `${res.truncated} dalších poddílů přesahuje limit ${SH_MAX_SUBS} na jednu sestavu.` : '',
     res.noCode ? `${res.noCode} ${res.noCode === 1 ? 'poddíl nemá' : res.noCode <= 4 ? 'poddíly nemají' : 'poddílů nemá'} u EANu odkaz s activeBarcode, v PDF ${res.noCode === 1 ? 'bude' : 'budou'} bez QR kódu.` : '',
     plan.sheet && !plan.rows.size && !plan.other.size ? `Ve druhém listu ${plan.sheet} nejsou řádky sestav a poddílů podle zvolených sloupců.` : '',
-    res.ambiguous ? `U ${res.ambiguous} EANů je v prvním listu více různých QR kódů, najdeš je nahoře v sekci „Nelze přidělit odkaz“. Propiskou vyber správný odkaz nebo zadej vlastní QR kód.` : '',
+    res.ambiguous ? `U ${res.ambiguous} EANů je v prvním listu více různých QR kódů, najdeš je nahoře v sekci „Nelze přidělit odkaz“. V nabídce u položky vyber variantu podle operace a interního záznamu, nebo zadej vlastní QR kód propiskou.` : '',
   ].filter(Boolean).map(t => `<div class="note w">${esc(t)}</div>`).join('')}${updated}${linked}`;
 }
 
@@ -692,7 +693,7 @@ function renderShortage() {
     // sestava s poddíly je jen orientační: bez QR kódu a pole na poznámku (2.29.1), dokud ji uživatel nezobrazí plně (2.31)
     const asm = !!subs && !i.full;
     const fullBtn = subs ? `<button class="btn sec small sh-fullbtn${i.full ? ' on' : ''}" type="button" data-shfull="${esc(i.id)}" aria-pressed="${!!i.full}" title="${i.full ? 'Sestava se ukazuje i tiskne celá (QR kód, poslední záznam, kolonky). Klikni a bude zase jen orientační.' : 'Ukázat a tisknout sestavu celou: QR kód, poslední záznam, kolonky na psaní a poznámku'}">${i.full ? 'Jen orientačně' : 'Zobrazit plně'}</button>` : '';
-    const qr = !i.code&&(i.qrChoices||[]).length>1 ? '<span class="tag warn">Nelze přidělit odkaz</span>' : i.code ? `<span class="tag ok sh-code">${esc(i.code)}</span>` : '<span class="tag warn">bez kódu</span>';
+    const qr = (i.qrChoices||[]).length>1 ? shQrSelect(i) : i.code ? `<span class="tag ok sh-code">${esc(i.code)}</span>` : '<span class="tag warn">bez kódu</span>';
     const topBtn = `<button class="btn sec small sh-topbtn${i.top ? ' on' : ''}" type="button" data-shtop="${esc(i.id)}" aria-pressed="${!!i.top}" title="${i.top ? 'Zrušit TOP SHORTAGE' : 'Označit jako TOP SHORTAGE (bude nahoře)'}" aria-label="${i.top ? 'Zrušit TOP SHORTAGE u' : 'Označit jako TOP SHORTAGE'} ${esc(i.ean || i.name)}">TOP</button>`
       + `<button class="btn sec small sh-topbtn sh-top2btn${i.top2 ? ' on' : ''}" type="button" data-shtop2="${esc(i.id)}" aria-pressed="${!!i.top2}" title="${i.top2 ? 'Zrušit TOP 2' : 'Označit jako TOP 2: zpracovat hned po TOP shortage'}" aria-label="${i.top2 ? 'Zrušit TOP 2 u' : 'Označit jako TOP 2'} ${esc(i.ean || i.name)}">TOP2</button>`;
     // oddělení položky (2.32): podle operace, nebo ručně jiné
@@ -718,7 +719,7 @@ function renderShortage() {
   const unresolved=l.items.filter(i=>!i.code&&(i.qrChoices||[]).length>1);
   const ordinary=l.items.filter(i=>!unresolved.includes(i));
   const sections=[...(unresolved.length?[{id:'unlinked',name:'Nelze přidělit odkaz',items:unresolved}]:[]),...shSections(c,ordinary)].filter(x=>x.items.length);
-  const rows=sections.map(sec=>`${depts.length||unresolved.length?`<tr class="sh-depthead" data-shdepthead="${esc(sec.id||'-')}"><td colspan="10"><b>${esc(sec.name||'Ostatní položky')}</b><span class="muted small"> · ${sec.items.length} ${shItemsN(sec.items.length)}</span>${sec.id==='unlinked'?'<p class="small">U EANu je více QR kódů. Propiskou vedle oka vyber odkaz nebo zadej vlastní kód.</p>':''}</td></tr>`:''}${sec.items.map(i=>rowHtml(i,num++)).join('')}`).join('');
+  const rows=sections.map(sec=>`${depts.length||unresolved.length?`<tr class="sh-depthead" data-shdepthead="${esc(sec.id||'-')}"><td colspan="10"><b>${esc(sec.name||'Ostatní položky')}</b><span class="muted small"> · ${sec.items.length} ${shItemsN(sec.items.length)}</span>${sec.id==='unlinked'?'<p class="small">U EANu je více QR kódů. Vyber variantu v nabídce u položky podle operace a interního záznamu. Vlastní kód zadáš propiskou.</p>':''}</td></tr>`:''}${sec.items.map(i=>rowHtml(i,num++)).join('')}`).join('');
   // filtr podle probíhající operace (2.31): víc operací najednou, platí i pro PDF
   const ops = shOpList(l);
   const sel = shOpSel(l);
@@ -841,7 +842,7 @@ async function shManualDialog(id = null) {
       <label class="field"><span>Urgentní množství</span><input name="qty" maxlength="40" autocomplete="off"></label>
       <label class="field"><span>Probíhající operace</span><input name="op" maxlength="300" autocomplete="off"></label>
       </div>
-      ${(original?.qrChoices||[]).length>1?`<label class="field"><span>Možné odkazy z výrobního plánu</span><select name="qrChoice"><option value="">Vyber odkaz, nebo uprav údaje níže</option>${original.qrChoices.map((x,i)=>`<option value="${i}">${esc(x.code)} — ${esc(x.link)}</option>`).join('')}</select></label>`:''}
+      ${(original?.qrChoices||[]).length>1?`<label class="field"><span>Možné odkazy z výrobního plánu</span><select name="qrChoice"><option value="">Vyber odkaz, nebo uprav údaje níže</option>${original.qrChoices.map((x,i)=>`<option value="${i}">${esc(shQrLabel(x))}</option>`).join('')}</select></label>`:''}
       <label class="field"><span>Odkaz s activeBarcode</span><input name="link" maxlength="2000" placeholder="https://…" autocomplete="off"></label>
       <label class="field"><span>QR kód (activeBarcode nebo vlastní kód)</span><input name="code" maxlength="120" autocomplete="off"></label>
       <div class="form-grid tk-grid">
@@ -856,7 +857,7 @@ async function shManualDialog(id = null) {
         if(!hit.sub)f.tier.value=original.top?'top':original.top2?'top2':'';
       }
       f.link.addEventListener('input',()=>{f.code.value=shCode(f.link.value);});
-      f.qrChoice?.addEventListener('change',()=>{const choice=original.qrChoices[f.qrChoice.value];if(choice){f.link.value=choice.link;f.code.value=choice.code;}});
+      f.qrChoice?.addEventListener('change',()=>{const choice=original.qrChoices[f.qrChoice.value];if(choice){f.link.value=choice.link;f.code.value=choice.code;f.op.value=choice.op||'';}});
     },
     validate:form=>{
       const f=form.elements;
@@ -877,7 +878,7 @@ async function shManualDialog(id = null) {
   const c=shc();
   if(hit){
     if(hit.sub){it.manual=true;it.sourceKey=original.sourceKey||shPlanKeyPart(original.ean)+'|'+original.code;}
-    if(it.code!==original.code)it.rec=null;
+    if(it.code!==original.code){const selected=original.qrChoices?.find(x=>x.code===it.code&&x.link===shLink(it.link));it.rec=shRecordMap(l).get(it.code)||selected?.rec||null;}
     Object.assign(original,it);
   }else if(l)l.items.push(it);
   else c.lists.unshift({id:'',at:now,by,file:'zadáno ručně',sheet:'',items:[it]});
@@ -885,6 +886,20 @@ async function shManualDialog(id = null) {
   if(!l)ui.sh.open=S.shortage.lists[0].id;
   save();renderShortage();
   toast(hit?'Změny položky byly uloženy.':`Položka ${it.ean||it.name} přidána.`);
+}
+
+function shQrLabel(choice){
+  const r=choice.rec;
+  const record=r?[r.state||'stav neuveden',r.op||'',r.qty?(/^[\d\s.,]+$/.test(r.qty)?`${r.qty} ks`:r.qty):'',r.when||'datum neuvedeno'].filter(Boolean).join(', '):'nenahrán';
+  return `${choice.code} | Operace: ${choice.op||'v plánu neuvedena'} | Interní záznam: ${record}`;
+}
+
+function shQrSelect(item){
+  const choices=item.qrChoices||[];
+  return `<label class="sh-qrpick"><span class="small">Varianta QR odkazu</span><select data-shqr="${esc(item.id)}" aria-label="Varianta QR odkazu položky ${esc(item.ean||item.name)}">
+    <option value=""${choices.some(x=>x.code===item.code)?'':' selected'} disabled>Vyber podle operace a záznamu</option>
+    ${choices.map(x=>`<option value="${esc(x.code)}"${x.code===item.code?' selected':''}>${esc(shQrLabel(x))}</option>`).join('')}
+    </select></label>${item.code?`<span class="tag ok sh-code">${esc(item.code)}</span>`:''}`;
 }
 
 function shEditBtn(x){
@@ -1274,6 +1289,11 @@ function bindShortage() {
     }
     if (t.matches('[data-shopdept]')) {
       if (shAssignOp(c, t.dataset.shopdept, t.dataset.shoplabel, t.value)) { save(); renderShortage(); }
+      return;
+    }
+    if(t.matches('[data-shqr]')){
+      const l=shList();
+      if(l&&shSelectQr(l,t.dataset.shqr,t.value)){save();renderShortage();$('#shView [data-shqr="'+CSS.escape(t.dataset.shqr)+'"]')?.focus();}
       return;
     }
     if (t.matches('[data-shst]')) {

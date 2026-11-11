@@ -16,3 +16,6 @@
 .toast.error { background: var(--crit); color: white; }
 @media (max-width: 1000px) { .desktop-main { padding: 20px 14px 48px; } .desktop-bar { padding: 10px 14px; } }
 @media print { .desktop-bar, .toast { display: none; } .desktop-main { padding: 0; } }
+
+.sh-qrpick { display: grid; gap: 4px; min-width: 240px; max-width: 320px; margin-bottom: 6px; }
+.sh-qrpick select { width: 100%; font-size: 13px; }

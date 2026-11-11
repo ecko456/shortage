@@ -136,3 +136,14 @@ test('Operace sestavy z vlastního řádku a ručně upraveného poddílu se akt
   const out=core()(seed+`const l={items:[{ean:'1',index:'A',order:'O',op:'Stará',subs:[{id:'s',ean:'9',code:'MAN',manual:true,sourceKey:'2|B.2',note:'Ručně',op:'Ručně stará'}]}]};const p=shPlanBlank('p');shPlanRow(p,'1','1','A','O','Montáž',L('A.1'));shPlanRow(p,'1','2','A','O','Balení',L('B.2'));shApplyPlan(l,p);return l.items[0];`);
   assert.equal(out.op,'Montáž');assert.equal(out.subs[0].op,'Balení');assert.equal(out.subs[0].code,'MAN');assert.equal(out.subs[0].note,'Ručně');
 });
+
+test('QR varianty mají vlastní operace a záznamy i při evidenci nahrané před plánem', () => {
+  const out=core()(seed+`let l={items:[{id:'i',ean:'1',note:'Zachovat',st:'wait'}]};shApplyRecs(l,shRecBuild([['Q.1','22.10.2026 9:00','5','Broušení'].map(x=>c(x))]).recs,{at:1});const p=shPlanBlank('p');shPlanDirectRow(p,'1',L('Q.1'),'Brus');shPlanDirectRow(p,'1',L('Q.2'),'Lakovna');shApplyPlan(l,p);l=cleanShortage({lists:[l]}).lists[0];const before=JSON.parse(JSON.stringify(l.items[0].qrChoices));shSelectQr(l,'i','Q.1');const first=JSON.parse(JSON.stringify(l.items[0]));shSelectQr(l,'i','Q.2');return {before,first,second:l.items[0],invalid:shSelectQr(l,'i','NEEXISTUJE')};`);
+  assert.deepEqual(out.before.map(x=>x.op),['Brus','Lakovna']);assert.equal(out.before[0].rec.state,'Broušení');assert.equal(out.before[1].rec,null);
+  assert.equal(out.first.op,'Brus');assert.equal(out.first.rec.qty,'5');assert.equal(out.first.note,'Zachovat');assert.equal(out.first.st,'wait');
+  assert.equal(out.second.op,'Lakovna');assert.equal(out.second.rec,null);assert.equal(out.invalid,false);
+});
+test('Nová evidence aktualizuje varianty a starší záznam nevrátí jejich stav zpět', () => {
+  const out=core()(seed+`const l={items:[{id:'i',ean:'1'}]},p=shPlanBlank('p');shPlanDirectRow(p,'1',L('Q.1'),'Brus');shPlanDirectRow(p,'1',L('Q.2'),'Lakovna');shApplyPlan(l,p);const rec=when=>shRecBuild([['Q.2','22.10.2026 '+when,'9','Hotovo'].map(x=>c(x))]).recs;shApplyRecs(l,rec('10:00'),{});shApplyRecs(l,rec('8:00'),{});shSelectQr(l,'i','Q.2');return cleanShortage({lists:[l]}).lists[0];`);
+  assert.match(out.items[0].rec.when,/10:00/);assert.match(out.items[0].qrChoices[1].rec.when,/10:00/);assert.equal(out.records.length,1);
+});
