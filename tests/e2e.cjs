@@ -70,7 +70,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   const rows=[head];
   for(const [ean,op]of [['0000901','Brush Hala 2'],['0000902','Lakovna'],['0000903','Lakovna']]){const r=Array(39).fill('');r[0]='0000456';r[4]=ean;r[7]='A';r[12]='OBJ2';r[38]=op;rows.push(r);}
   const pws=X.utils.aoa_to_sheet(rows);for(let r=2;r<=4;r++)pws['E'+r].l={Target:'https://erp.example/?activeBarcode=B.'+(r-1)};
-  const dws=X.utils.aoa_to_sheet([['Popis','EAN dílu','Probíhající operace'],['Samostatný díl','0000123','Vrtání Hala 2'],['Sestava v plánu','0000456','Montáž Hala 2']]);
+  const dws=X.utils.aoa_to_sheet([['Popis','EAN dílu','Probíhající operace','Číslo objednávky','Line'],['Samostatný díl','0000123','Vrtání Hala 2','OBJ1','A'],['Sestava v plánu','0000456','Montáž Hala 2','OBJ2','A']]);
   dws.B2.l={Target:'https://erp.example/?activeBarcode=A.1'};dws.B3.l={Target:'https://erp.example/?activeBarcode=A.2'};
   workbook(planFile,[['Díly',dws],['Poddíly',pws]]);
   const moves=path.join(resultDir,'pohyb.xlsx');
@@ -91,7 +91,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   console.log('ok import Excelu, EAN s nulami a priority');
   await page.locator('#shPlanFile').setInputFiles(planFile);
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
-  assert.equal(await page.locator('#dlg [data-shcol]').count(),2);assert.equal(await page.locator('#dlg [name="c-ean"]').inputValue(),'B');
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),4);assert.equal(await page.locator('#dlg [name="c-ean"]').inputValue(),'B');assert.equal(await page.locator('#dlg [name="c-order"]').inputValue(),'D');assert.equal(await page.locator('#dlg [name="c-index"]').inputValue(),'E');
   await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('2. list'));
   assert.equal(await page.locator('#dlg [name="c-asm"]').inputValue(),'A');assert.equal(await page.locator('#dlg [name="c-sub"]').inputValue(),'E');
@@ -214,10 +214,10 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   console.log('ok urgenty A–S: text, HTML, Excel a PDF bez kroku 3');
   // Soubor jen s prvním listem: výběr jednoho EAN sloupce, žádný dotaz na sestavu.
   await paste('',wide.join('\t'));await page.waitForFunction(()=>S.shortage.lists.length===7);
-  const one=path.join(resultDir,'plan-jen-dily.xlsx');const oneWs=X.utils.aoa_to_sheet([['','','','EAN dílu'],['','','','0000555']]);oneWs.D2.l={Target:'https://erp.example/?activeBarcode=U.0'};
+  const one=path.join(resultDir,'plan-jen-dily.xlsx');const oneWs=X.utils.aoa_to_sheet([['Číslo objednávky','Line','','EAN dílu'],['OBJ77','TOP','','0000555']]);oneWs.D2.l={Target:'https://erp.example/?activeBarcode=U.0'};
   workbook(one,[['Jen díly',oneWs]]);await page.locator('#shPlanFile').setInputFiles(one);
   await page.waitForFunction(()=>$('#dlg').open && $('#dlgTitle').textContent.includes('1. list'));
-  assert.equal(await page.locator('#dlg [data-shcol]').count(),2);await page.locator('#dlgOk').click();
+  assert.equal(await page.locator('#dlg [data-shcol]').count(),4);await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items[0].code==='U.0');
   assert.equal(await page.locator('#dlg[open]').count(),0);assert.equal(await page.evaluate(()=>shList().items[0].subs.length),0);
   assert.equal(await page.evaluate(()=>shList().items[0].note),'Poznámka od plánování: Brus Hala 2');await saved();
@@ -231,7 +231,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   await page.waitForFunction(()=>!shList().items[0].code);
   const beforeChoices=path.join(resultDir,'zaznamy-pred-planem.xlsx');workbook(beforeChoices,[['Pohyb',X.utils.aoa_to_sheet([['QR kód','Datum a čas','Počet ks','Stav'],['Q.1','22.10.2026 8:15','4','Broušení']])]]);
   await page.locator('#shMoveFile').setInputFiles(beforeChoices);await page.waitForFunction(()=>shList().records.some(x=>x.code==='Q.1'));
-  const ambiguous=path.join(resultDir,'plan-vice-qr.xlsx');const aw=X.utils.aoa_to_sheet([['EAN dílu','Probíhající operace'],['0000555','Brus'],['0000555','Lakovna']]);aw.A2.l={Target:'https://erp.example/?activeBarcode=Q.1'};aw.A3.l={Target:'https://erp.example/?activeBarcode=Q.2'};
+  const ambiguous=path.join(resultDir,'plan-vice-qr.xlsx');const aw=X.utils.aoa_to_sheet([['EAN dílu','Probíhající operace','Číslo objednávky','Line'],['0000555','Brus','OBJ77','TOP'],['0000555','Lakovna','OBJ77','TOP'],['0000555','Cizí objednávka','OBJ99','TOP'],['0000555','Cizí line','OBJ77','OTHER']]);aw.A2.l={Target:'https://erp.example/?activeBarcode=Q.1'};aw.A3.l={Target:'https://erp.example/?activeBarcode=Q.2'};aw.A4.l={Target:'https://erp.example/?activeBarcode=FOREIGN.ORDER'};aw.A5.l={Target:'https://erp.example/?activeBarcode=FOREIGN.LINE'};
   workbook(ambiguous,[['Díly',aw]]);await page.locator('#shPlanFile').setInputFiles(ambiguous);
   await page.waitForFunction(()=>$('#dlg').open&&$('#dlgTitle').textContent.includes('1. list'));await page.locator('#dlgOk').click();
   await page.waitForFunction(()=>shList().items[0].qrChoices.length===2);await saved();
@@ -239,6 +239,7 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   let qrMenu=page.locator(`[data-shqr="${editId}"]`);
   assert.match(await qrMenu.locator('option[value="Q.1"]').textContent(),/Operace: Brus.*Broušení.*4 ks.*8:15/);
   assert.match(await qrMenu.locator('option[value="Q.2"]').textContent(),/Operace: Lakovna.*Interní záznam: nenahrán/);
+  assert.equal(await qrMenu.locator('option').count(),3);assert.equal(await qrMenu.locator('option[value^="FOREIGN"]').count(),0);
   const afterChoices=path.join(resultDir,'zaznamy-po-planu.xlsx');workbook(afterChoices,[['Pohyb',X.utils.aoa_to_sheet([['QR kód','Datum a čas','Počet ks','Stav'],['Q.2','22.10.2026 9:30','7','Hotovo']])]]);
   await page.locator('#shMoveFile').setInputFiles(afterChoices);await page.waitForFunction(()=>shList().items[0].qrChoices[1].rec?.state==='Hotovo');
   assert.match(await qrMenu.locator('option[value="Q.2"]').textContent(),/Lakovna.*Hotovo.*7 ks.*9:30/);
@@ -300,6 +301,21 @@ async function paste(html,text){await page.evaluate(({html,text})=>{
   assert.equal(await page.locator(`[data-shnote="${first}"]`).inputValue(),longNote);
   assert.equal(await page.locator(`[data-shnote="${first}"]`).evaluate(e=>e.scrollHeight<=e.clientHeight+1),true);
   console.log('ok obnova probíhajících operací a plné víceřádkové poznámky po restartu');
+  // Tentýž EAN ve dvou objednávkách a dvou line nesmí vytvořit společnou nabídku.
+  const exactUrgents=path.join(resultDir,'urgenty-presne-parovani.xlsx');
+  workbook(exactUrgents,[['Shortage',X.utils.aoa_to_sheet([['Číslo objednávky','Název dílu','EAN','Line','Urgentní množství'],['O1','První','000777','10','1'],['O1','Druhá line','000777','20','1'],['O2','Jiná objednávka','000777','10','1']])]]);
+  await page.locator('#shFile').setInputFiles(exactUrgents);await listColumns();
+  await page.waitForFunction(()=>shList().items.length===3&&shList().items[0].ean==='000777');
+  const exactPlan=path.join(resultDir,'plan-presne-parovani.xlsx');const ew=X.utils.aoa_to_sheet([['EAN dílu','Objednávka','Line','Probíhající operace'],['000777','O1','10','Brus'],['000777','O1','20','Lakovna'],['000777','O2','10','Kontrola']]);
+  for(let r=2;r<=4;r++)ew['A'+r].l={Target:'https://erp.example/?activeBarcode=EXACT.'+r};
+  workbook(exactPlan,[['Díly',ew]]);await page.locator('#shPlanFile').setInputFiles(exactPlan);
+  await page.waitForFunction(()=>$('#dlg').open&&$('#dlgTitle').textContent.includes('1. list'));
+  assert.equal(await page.locator('#dlg [name="c-order"]').inputValue(),'B');assert.equal(await page.locator('#dlg [name="c-index"]').inputValue(),'C');
+  await page.screenshot({path:path.join(resultDir,'prvni-list-parovani.png')});await page.locator('#dlgOk').click();
+  await page.waitForFunction(()=>shList().items.every(x=>x.code.startsWith('EXACT.')));
+  assert.deepEqual(await page.evaluate(()=>shList().items.map(x=>[x.order,x.index,x.code,x.op])),[['O1','10','EXACT.2','Brus'],['O1','20','EXACT.3','Lakovna'],['O2','10','EXACT.4','Kontrola']]);
+  assert.equal(await page.locator('[data-shqr]').count(),0);await saved();
+  console.log('ok první list páruje EAN + objednávku + line a nepřimíchá cizí QR varianty');
   assert.deepEqual(errors,[]);assert.deepEqual(network,[]);
   console.log('ok žádné chyby JavaScriptu, žádné síťové požadavky');
   await app.close();app=null;

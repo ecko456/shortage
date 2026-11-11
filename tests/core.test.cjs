@@ -97,9 +97,9 @@ test('Sloupec S je i poznámka od plánování, staré uložené mapování ji n
   const out=core()(seed+`const r=Array.from({length:19},()=>c(''));r[0]=c('001');r[2]=c('Držák');r[18]=c('Dodržet termín 10:00');const old={order:'F',name:'C',ean:'A',index:'G',qty:'H',top:'',op:'S'};const cols=shColsGuess('list',[r.map(x=>x.text)],old).cols;return {item:shBuild([r],cols).items[0],blank:shPlanningNote('  '),long:cleanShortage({lists:[{id:'sh1',items:[{ean:'1',note:shPlanningNote('x'.repeat(700))}]}]}).lists[0].items[0].note};`);
   assert.equal(out.item.note,'Poznámka od plánování: Dodržet termín 10:00');assert.equal(out.item.op,'Dodržet termín 10:00');assert.equal(out.blank,'');assert.equal(out.long,'Poznámka od plánování: '+'x'.repeat(700));
 });
-test('První list plánu vyžaduje pouze EAN a nabízí volitelnou operaci', () => {
+test('První list nabízí EAN, objednávku, line a operaci se samostatným nastavením', () => {
   const out=core()(`return {fields:Object.keys(SH_COL_NAMES.planItem),guess:shColsGuess('planItem',[['Popis','EAN dílu']],SH_COLS.planItem),saved:cleanShortage({cols:{planItem:{ean:'B',sheet:'Díly'},plan:{asm:'A',sub:'E',sheet:'Sestavy'}}}).cols};`);
-  assert.deepEqual(out.fields,['ean','op']);assert.equal(out.guess.cols.ean,'B');assert.equal(out.guess.header,0);assert.equal(out.saved.planItem.ean,'B');assert.equal(out.saved.plan.sheet,'Sestavy');
+  assert.deepEqual(out.fields,['ean','order','index','op']);assert.equal(out.guess.cols.ean,'B');assert.equal(out.guess.header,0);assert.equal(out.saved.planItem.ean,'B');assert.equal(out.saved.plan.sheet,'Sestavy');
 });
 test('První list doplní pouze jednoznačný QR kód a zachová odkazy i poznámky', () => {
   const out=core()(seed+`const p=shPlanBlank('p.xlsx');shPlanDirectRow(p,'001',L('D.1'));shPlanDirectRow(p,'1',L('D.1'));shPlanDirectRow(p,'2',L('D.2'));shPlanDirectRow(p,'2',L('D.3'));const l={items:[{ean:'1',note:'Ručně',subs:[]},{ean:'2',code:'OWN',link:L('OWN'),subs:[]},{ean:'2',code:'',subs:[]}]};const r=shApplyPlan(l,p);return {r,items:l.items};`);
@@ -146,4 +146,18 @@ test('QR varianty mají vlastní operace a záznamy i při evidenci nahrané př
 test('Nová evidence aktualizuje varianty a starší záznam nevrátí jejich stav zpět', () => {
   const out=core()(seed+`const l={items:[{id:'i',ean:'1'}]},p=shPlanBlank('p');shPlanDirectRow(p,'1',L('Q.1'),'Brus');shPlanDirectRow(p,'1',L('Q.2'),'Lakovna');shApplyPlan(l,p);const rec=when=>shRecBuild([['Q.2','22.10.2026 '+when,'9','Hotovo'].map(x=>c(x))]).recs;shApplyRecs(l,rec('10:00'),{});shApplyRecs(l,rec('8:00'),{});shSelectQr(l,'i','Q.2');return cleanShortage({lists:[l]}).lists[0];`);
   assert.match(out.items[0].rec.when,/10:00/);assert.match(out.items[0].qrChoices[1].rec.when,/10:00/);assert.equal(out.records.length,1);
+});
+
+test('První list oddělí stejný EAN podle objednávky i line bez návratu k EANu', () => {
+  const out=core()(seed+`const p=shPlanBlank('p');shPlanDirectRow(p,'001',L('O1-L10'),'Brus','0010','OBJ1');shPlanDirectRow(p,'1',L('O1-L20'),'Lakovna','20','OBJ1');shPlanDirectRow(p,'1',L('O2-L10'),'Montáž','10','OBJ2');const l={items:[{ean:'1',index:'10',order:'OBJ1'},{ean:'1',index:'20',order:'OBJ1'},{ean:'1',index:'10',order:'OBJ2'},{ean:'1',index:'99',order:'OBJ1',op:'Zachovat'},{ean:'1',index:'',order:'OBJ1'}]};const result=shApplyPlan(l,p);return {result,items:l.items};`);
+  assert.deepEqual(out.items.slice(0,3).map(x=>[x.code,x.op]),[['O1-L10','Brus'],['O1-L20','Lakovna'],['O2-L10','Montáž']]);
+  assert.equal(out.items[3].code,undefined);assert.equal(out.items[3].op,'Zachovat');assert.deepEqual(out.items[3].qrChoices,[]);assert.equal(out.result.unmatchedFirst,2);
+});
+test('Nabídka QR a interní záznamy obsahují pouze varianty přesné objednávky a line', () => {
+  const out=core()(seed+`const p=shPlanBlank('p');shPlanDirectRow(p,'1',L('A'),'Brus','10','O1');shPlanDirectRow(p,'1',L('B'),'Kontrola','10','O1');shPlanDirectRow(p,'1',L('FOREIGN'),'Lakovna','10','O2');const l={items:[{id:'i',ean:'1',index:'10',order:'O1'}]};shApplyRecs(l,shRecBuild([['B','22.10.2026 8:00','3','Hotovo'],['FOREIGN','22.10.2026 9:00','5','Cizí']].map(r=>r.map(x=>c(x)))).recs,{});shApplyPlan(l,p);const before=l.items[0].qrChoices;const forbidden=shSelectQr(l,'i','FOREIGN');const selected=shSelectQr(l,'i','B');return {before,forbidden,selected,item:l.items[0]};`);
+  assert.deepEqual(out.before.map(x=>x.code),['A','B']);assert.equal(out.forbidden,false);assert.equal(out.selected,true);assert.equal(out.item.rec.state,'Hotovo');
+});
+test('Dříve vybraný cizí QR je označen k ověření a lze vybrat jediný přesný odkaz', () => {
+  const out=core()(seed+`const p=shPlanBlank('p');shPlanDirectRow(p,'1',L('RIGHT'),'Brus','10','O1');const l={items:[{id:'i',ean:'1',index:'10',order:'O1',code:'WRONG'}]};const r=shApplyPlan(l,p);const conflict=l.items[0].qrConflict;const kept=l.items[0].code;shSelectQr(l,'i','RIGHT');return {r,conflict,kept,item:l.items[0]};`);
+  assert.equal(out.conflict,true);assert.equal(out.kept,'WRONG');assert.equal(out.r.conflicts,1);assert.equal(out.item.code,'RIGHT');assert.equal(out.item.qrConflict,false);
 });

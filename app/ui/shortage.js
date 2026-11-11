@@ -138,8 +138,14 @@ async function shColsDialog(kind, sheets, { cols, sheetI, header, how, note, fil
       ${(kind === 'plan' || kind === 'list') && sheets.length > 1 ? `<label class="field"><span>List v souboru</span><select name="sheet">${sheets.map((sh, i) => `<option value="${i}"${i === sheetI ? ' selected' : ''}>${esc(sh.name)}</option>`).join('')}</select></label>` : ''}
       <div class="sh-colgrid">${fields.map(f => `<label class="field"><span>${esc(SH_COL_NAMES[kind][f])}${SH_COL_NEED[kind].includes(f) ? ' *' : ''}</span><select name="c-${f}" data-shcol="${f}">${opts(sheets[sheetI], cols[f], f)}</select></label>`).join('')}</div>
       ${kind === 'list' ? '<p class="note i">Do poznámek se vloží obsah vybraného sloupce s předponou <b>Poznámka od plánování:</b>. Pro tabulku urgentů A–S zvol S; můžeš vybrat i jiný sloupec, nebo poznámky vynechat.</p>' : ''}
+      ${kind === 'planItem' ? '<p class="note i">Párování používá EAN + číslo objednávky + line/index. Vyber všechny tři sloupce, pokud jsou ve zdroji. Chybějící údaj se neshoduje s vyplněným údajem urgentu; aplikace nepřejde na odhad pouze podle EANu.</p>' : ''}
       <h4>Vzor prvních řádků</h4><div id="shColPrev">${prev(sheets[sheetI], cols)}</div>
       <p class="tiny muted">Sloupce se rozpoznávají místně podle nadpisů. Žádná data se nikam neodesílají. * = povinné.</p></div>`,
+    validate: form => {
+      if(kind!=='planItem')return '';
+      const identity=['ean','order','index'].map(f=>form.elements.namedItem(`c-${f}`).value).filter(Boolean);
+      return new Set(identity).size!==identity.length?'EAN, číslo objednávky a line/index musí mít různé sloupce.':'';
+    },
     onOpen: dlg => {
       const read = () => { const o = {}; fields.forEach(f => { o[f] = dlg.querySelector(`[name="c-${f}"]`).value; }); return o; };
       const sel = dlg.querySelector('[name="sheet"]');
@@ -158,7 +164,7 @@ async function shColsDialog(kind, sheets, { cols, sheetI, header, how, note, fil
   if (res.value !== 'ok') return null;
   const out = {};
   fields.forEach(f => { out[f] = res.form.elements.namedItem(`c-${f}`).value; });
-  return { cols: { ...cols, ...out, ...(kind === 'list' ? {noteChosen:true} : {}) }, sheetI, changed };
+  return { cols: { ...cols, ...out, ...(kind === 'list' ? {noteChosen:true} : {}),...(kind === 'planItem' ? {matchVersion:1} : {}) }, sheetI, changed };
 }
 
 async function shColorDialog(r) {
@@ -529,7 +535,7 @@ async function shPlanFast(b, plan, progress, SH_PC = shPcOf(), sheetName = '', m
     }
     keep.forEach(x => { if (!x.link && x.rid) x.link = target.get(x.rid) || ''; });
   }
-  keep.forEach(x => { if (mode === 'items') shPlanDirectRow(plan,x.e,x.link,SH_PC.am>=0?(x.op??''):undefined); else shPlanRow(plan,x.a,x.e,x.h,x.m,x.op,x.link); });
+  keep.forEach(x => { if (mode === 'items') shPlanDirectRow(plan,x.e,x.link,SH_PC.am>=0?(x.op??''):undefined,x.h,x.m); else shPlanRow(plan,x.a,x.e,x.h,x.m,x.op,x.link); });
 }
 
 function shPcOf(cols) {
@@ -543,7 +549,7 @@ async function shPlanRead(file, progress, cols = null, itemCols = null) {
   const first = itemCols || shColsOf('planItem');
   const itemColumns = shColIdx('planItem', first);
   const ean = itemColumns.ean;
-  const itemPc = { a: ean, e: ean, h: -1, m: -1, am: itemColumns.op };
+  const itemPc = { a: ean, e: ean, h: itemColumns.index, m: itemColumns.order, am: itemColumns.op };
   const plan = shPlanBlank(file.name);
   if (b[0] === 0x50 && b[1] === 0x4b && waDeflateRaw && !window.SH_PLAN_SHEETJS) {
     try {
@@ -564,7 +570,7 @@ async function shPlanRead(file, progress, cols = null, itemCols = null) {
     for (let r=range.s.r;r<=range.e.r;r++) {
       const cell = at(r,pc.e);
       fresh.total++;
-      if (mode === 'items') shPlanDirectRow(fresh,shCellText(cell),shCellLink(cell),pc.am>=0?shCellText(at(r,pc.am)):undefined);
+      if (mode === 'items') shPlanDirectRow(fresh,shCellText(cell),shCellLink(cell),pc.am>=0?shCellText(at(r,pc.am)):undefined,shCellText(at(r,pc.h)),shCellText(at(r,pc.m)));
       else shPlanRow(fresh,shCellText(at(r,pc.a)),shCellText(cell),shCellText(at(r,pc.h)),shCellText(at(r,pc.m)),shCellText(at(r,pc.am)),shCellLink(cell));
       if (progress && r % 5000 === 4999) await progress(fresh.total);
     }
@@ -578,7 +584,7 @@ function shUsePlan(l, plan) {
   const copy = JSON.parse(JSON.stringify(l));
   const res = shApplyPlan(copy, plan);
   if (!res.items && l.items.some(i => (i.subs || []).length)) {
-    l.items.forEach((it,i) => { it.link=copy.items[i].link; it.code=copy.items[i].code; it.qrChoices=copy.items[i].qrChoices; it.op=copy.items[i].op; it.pop=copy.items[i].pop; it.rec=copy.items[i].rec; });
+    l.items.forEach((it,i) => { it.link=copy.items[i].link; it.code=copy.items[i].code; it.qrChoices=copy.items[i].qrChoices; it.qrKey=copy.items[i].qrKey; it.qrConflict=copy.items[i].qrConflict; it.planMismatch=copy.items[i].planMismatch; it.op=copy.items[i].op; it.pop=copy.items[i].pop; it.rec=copy.items[i].rec; });
     return { ...res, kept: true };
   }
   l.items = copy.items;
@@ -595,10 +601,12 @@ function shPlanNote(res, plan, auto) {
   const linked = res.linked ? `<div class="note i">Z prvního listu doplněn QR kód u ${res.linked} ${res.linked === 1 ? 'položky' : 'položek'}.</div>` : '';
   if (res.kept) return `<div class="note w">${head}: k položkám seznamu nenašel žádný poddíl, poddíly zůstaly beze změny.</div>${updated}${linked}`;
   return `<div class="note ${res.subs || !plan.sheet ? 'i' : 'w'}">${head}: ${res.subs ? `<b>${res.subs} ${shSubsN(res.subs)}</b> u ${res.items} ${res.items === 1 ? 'sestavy' : 'sestav'}` : plan.sheet ? 'k položkám seznamu nebyly nalezeny poddíly' : 'samostatné díly bez sestav'}.</div>${[
+    res.unmatchedFirst ? `U ${res.unmatchedFirst} položek první list obsahuje EAN, ale nesouhlasí objednávka nebo line/index. Odkaz ani operace z těchto řádků se nepřiřadily. Zkontroluj sloupce prvního listu.` : '',
+    res.conflicts ? `U ${res.conflicts} položek se uložený QR kód liší od variant pro přesnou objednávku a line. Jsou nahoře k ručnímu ověření.` : '',
     res.truncated ? `${res.truncated} dalších poddílů přesahuje limit ${SH_MAX_SUBS} na jednu sestavu.` : '',
     res.noCode ? `${res.noCode} ${res.noCode === 1 ? 'poddíl nemá' : res.noCode <= 4 ? 'poddíly nemají' : 'poddílů nemá'} u EANu odkaz s activeBarcode, v PDF ${res.noCode === 1 ? 'bude' : 'budou'} bez QR kódu.` : '',
     plan.sheet && !plan.rows.size && !plan.other.size ? `Ve druhém listu ${plan.sheet} nejsou řádky sestav a poddílů podle zvolených sloupců.` : '',
-    res.ambiguous ? `U ${res.ambiguous} EANů je v prvním listu více různých QR kódů, najdeš je nahoře v sekci „Nelze přidělit odkaz“. V nabídce u položky vyber variantu podle operace a interního záznamu, nebo zadej vlastní QR kód propiskou.` : '',
+    res.ambiguous ? `U ${res.ambiguous} položek má stejný EAN, objednávka a line v prvním listu více QR kódů, najdeš je nahoře v sekci „Nelze přidělit odkaz“. V nabídce u položky vyber variantu podle operace a interního záznamu, nebo zadej vlastní QR kód propiskou.` : '',
   ].filter(Boolean).map(t => `<div class="note w">${esc(t)}</div>`).join('')}${updated}${linked}`;
 }
 
@@ -607,7 +615,7 @@ async function shPlanImport(file, force = false) {
   const msg = $('#shMsg');
   if (/\.(csv|txt)$/i.test(file.name)) { msg.innerHTML = '<div class="note w">Výrobní plán nahraj jako soubor Excelu (xlsx): CSV nemá odkazy u EANů poddílů.</div>'; return; }
   ui.sh.last = { ...(ui.sh.last || {}), plan: { file } };
-  // První list: EAN dílu a volitelně probíhající operace. Druhý list: vazby sestava → poddíl.
+  // První list: EAN, objednávka, line/index a probíhající operace. Druhý list: vazby sestava → poddíl.
   msg.innerHTML = `<div class="note i">Čtu nadpisy výrobního plánu <b>${esc(file.name)}</b>…</div>`;
   let sheets = [];
   try {
@@ -615,7 +623,7 @@ async function shPlanImport(file, force = false) {
     for (const sh of book) { const { head } = await sh.read({ top: 8 }); sheets.push({ name: sh.name, rows: head }); }
   } catch (error) { msg.innerHTML = `<div class="note w">Výrobní plán se nepodařilo otevřít: ${esc(error.message)}</div>`; return; }
   if (!sheets.length) { msg.innerHTML='<div class="note w">Výrobní plán nemá žádný list.</div>'; return; }
-  const firstTime = !shc().cols.planItem;
+  const firstTime = shc().cols.planItem?.matchVersion!==1;
   const itemHow = await shColsFor('planItem', [sheets[0]], { file: file.name, force: force || firstTime, remember: false });
   if (!itemHow) { msg.innerHTML=''; return; }
   const how = sheets.length > 1 ? await shColsFor('plan', [sheets[1]], { file: file.name, force: force || firstTime, remember: false }) : null;
@@ -693,7 +701,7 @@ function renderShortage() {
     // sestava s poddíly je jen orientační: bez QR kódu a pole na poznámku (2.29.1), dokud ji uživatel nezobrazí plně (2.31)
     const asm = !!subs && !i.full;
     const fullBtn = subs ? `<button class="btn sec small sh-fullbtn${i.full ? ' on' : ''}" type="button" data-shfull="${esc(i.id)}" aria-pressed="${!!i.full}" title="${i.full ? 'Sestava se ukazuje i tiskne celá (QR kód, poslední záznam, kolonky). Klikni a bude zase jen orientační.' : 'Ukázat a tisknout sestavu celou: QR kód, poslední záznam, kolonky na psaní a poznámku'}">${i.full ? 'Jen orientačně' : 'Zobrazit plně'}</button>` : '';
-    const qr = (i.qrChoices||[]).length>1 ? shQrSelect(i) : i.code ? `<span class="tag ok sh-code">${esc(i.code)}</span>` : '<span class="tag warn">bez kódu</span>';
+    const qr = ((i.qrChoices||[]).length>1||i.qrConflict) ? shQrSelect(i) : i.planMismatch ? '<span class="tag warn">Neshoda objednávky / line</span>' : i.code ? `<span class="tag ok sh-code">${esc(i.code)}</span>` : '<span class="tag warn">bez kódu</span>';
     const topBtn = `<button class="btn sec small sh-topbtn${i.top ? ' on' : ''}" type="button" data-shtop="${esc(i.id)}" aria-pressed="${!!i.top}" title="${i.top ? 'Zrušit TOP SHORTAGE' : 'Označit jako TOP SHORTAGE (bude nahoře)'}" aria-label="${i.top ? 'Zrušit TOP SHORTAGE u' : 'Označit jako TOP SHORTAGE'} ${esc(i.ean || i.name)}">TOP</button>`
       + `<button class="btn sec small sh-topbtn sh-top2btn${i.top2 ? ' on' : ''}" type="button" data-shtop2="${esc(i.id)}" aria-pressed="${!!i.top2}" title="${i.top2 ? 'Zrušit TOP 2' : 'Označit jako TOP 2: zpracovat hned po TOP shortage'}" aria-label="${i.top2 ? 'Zrušit TOP 2 u' : 'Označit jako TOP 2'} ${esc(i.ean || i.name)}">TOP2</button>`;
     // oddělení položky (2.32): podle operace, nebo ručně jiné
@@ -716,10 +724,10 @@ function renderShortage() {
   };
   // bloky podle oddělení (2.32), čísla v pořadí zobrazení
   let num = 0;
-  const unresolved=l.items.filter(i=>!i.code&&(i.qrChoices||[]).length>1);
+  const unresolved=l.items.filter(i=>i.qrConflict||i.planMismatch||!i.code&&(i.qrChoices||[]).length>1);
   const ordinary=l.items.filter(i=>!unresolved.includes(i));
   const sections=[...(unresolved.length?[{id:'unlinked',name:'Nelze přidělit odkaz',items:unresolved}]:[]),...shSections(c,ordinary)].filter(x=>x.items.length);
-  const rows=sections.map(sec=>`${depts.length||unresolved.length?`<tr class="sh-depthead" data-shdepthead="${esc(sec.id||'-')}"><td colspan="10"><b>${esc(sec.name||'Ostatní položky')}</b><span class="muted small"> · ${sec.items.length} ${shItemsN(sec.items.length)}</span>${sec.id==='unlinked'?'<p class="small">U EANu je více QR kódů. Vyber variantu v nabídce u položky podle operace a interního záznamu. Vlastní kód zadáš propiskou.</p>':''}</td></tr>`:''}${sec.items.map(i=>rowHtml(i,num++)).join('')}`).join('');
+  const rows=sections.map(sec=>`${depts.length||unresolved.length?`<tr class="sh-depthead" data-shdepthead="${esc(sec.id||'-')}"><td colspan="10"><b>${esc(sec.name||'Ostatní položky')}</b><span class="muted small"> · ${sec.items.length} ${shItemsN(sec.items.length)}</span>${sec.id==='unlinked'?'<p class="small">Zkontroluj objednávku a line/index. Pokud jsou k dispozici odpovídající QR kódy, vyber variantu v nabídce u položky podle operace a interního záznamu. Vlastní kód zadáš propiskou.</p>':''}</td></tr>`:''}${sec.items.map(i=>rowHtml(i,num++)).join('')}`).join('');
   // filtr podle probíhající operace (2.31): víc operací najednou, platí i pro PDF
   const ops = shOpList(l);
   const sel = shOpSel(l);
@@ -842,7 +850,7 @@ async function shManualDialog(id = null) {
       <label class="field"><span>Urgentní množství</span><input name="qty" maxlength="40" autocomplete="off"></label>
       <label class="field"><span>Probíhající operace</span><input name="op" maxlength="300" autocomplete="off"></label>
       </div>
-      ${(original?.qrChoices||[]).length>1?`<label class="field"><span>Možné odkazy z výrobního plánu</span><select name="qrChoice"><option value="">Vyber odkaz, nebo uprav údaje níže</option>${original.qrChoices.map((x,i)=>`<option value="${i}">${esc(shQrLabel(x))}</option>`).join('')}</select></label>`:''}
+      ${(original?.qrChoices||[]).length?`<label class="field"><span>Možné odkazy z výrobního plánu</span><select name="qrChoice"><option value="">Vyber odkaz, nebo uprav údaje níže</option>${original.qrChoices.map((x,i)=>`<option value="${i}">${esc(shQrLabel(x))}</option>`).join('')}</select></label>`:''}
       <label class="field"><span>Odkaz s activeBarcode</span><input name="link" maxlength="2000" placeholder="https://…" autocomplete="off"></label>
       <label class="field"><span>QR kód (activeBarcode nebo vlastní kód)</span><input name="code" maxlength="120" autocomplete="off"></label>
       <div class="form-grid tk-grid">
@@ -879,7 +887,12 @@ async function shManualDialog(id = null) {
   if(hit){
     if(hit.sub){it.manual=true;it.sourceKey=original.sourceKey||shPlanKeyPart(original.ean)+'|'+original.code;}
     if(it.code!==original.code){const selected=original.qrChoices?.find(x=>x.code===it.code&&x.link===shLink(it.link));it.rec=shRecordMap(l).get(it.code)||selected?.rec||null;}
+    const identityChanged=shPlanKey(original.ean,original.index,original.order)!==shPlanKey(it.ean,it.index,it.order);
     Object.assign(original,it);
+    if(!hit.sub){
+      if(identityChanged){original.qrChoices=[];original.qrKey='';original.qrConflict=false;original.planMismatch=false;}
+      else original.qrConflict=!!(original.qrChoices?.length&&!original.qrChoices.some(x=>x.code===it.code));
+    }
   }else if(l)l.items.push(it);
   else c.lists.unshift({id:'',at:now,by,file:'zadáno ručně',sheet:'',items:[it]});
   S.shortage=cleanShortage(c);

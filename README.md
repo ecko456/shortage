@@ -6,7 +6,7 @@ z Odměn V2, oddělený od hodnocení lidí a ostatních modulů.
 ## Stažení a spuštění
 
 1. Otevři [nejnovější vydání](https://github.com/ecko456/shortage/releases/latest).
-2. Stáhni `Shortage-1.5.0-Windows-x64.exe` do svého počítače.
+2. Stáhni `Shortage-1.6.0-Windows-x64.exe` do svého počítače.
 3. Spusť soubor. Instalace, PHP, Node.js ani připojení k serveru nejsou potřeba.
 
 Určeno pro **Windows 10/11, 64 bitů (x64)**. Jde o přenosný program; data ukládá do
@@ -79,16 +79,19 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
 
 ### Výrobní plán: dva různé listy
 
-- **První list – díly bez sestav:** povinný je pouze sloupec **EAN dílu**.
-  Volitelně zvol sloupec **Probíhající operace**; pokud v listu není, nech „v souboru není“.
-  Odkaz z jeho buňky doplní chybějící QR u urgentu, pokud je pro EAN jednoznačný.
-  Už vyplněný odkaz ani kód se nepřepisuje. Pokud stejný EAN odkazuje na více různých
-  kódů, položka se objeví nahoře v sekci **Nelze přidělit odkaz**. Propiskou vedle
-  oka lze vyplnit vlastní odkaz či QR kód. Přímo u položky je také nabídka **Varianta
-  QR odkazu**: každá možnost obsahuje QR kód, probíhající operaci a dostupný interní
-  záznam (stav, množství a čas). Pokud záznam chybí, je uvedeno „nenahrán“.
-  Výběr přiřadí odpovídající odkaz, operaci i záznam a vyřešená položka se vrátí
-  do běžného seznamu. Nabídka zůstává dostupná pro změnu volby i po restartu.
+- **První list – díly bez sestav:** nastav **EAN dílu**, **číslo objednávky**,
+  **line/index** a případně **probíhající operaci**. Párování odkazů i operací
+  vyžaduje shodu všech tří identifikačních údajů, stejně jako u druhého listu.
+  Názvy hlaviček Line i Index se rozpoznávají místně.
+  Pokud ve zdroji objednávka nebo line nejsou, lze zvolit „v souboru není“;
+  prázdný údaj se ale neshoduje s vyplněným údajem urgentu. Aplikace nepřejde
+  na odhad pouze podle EANu. EAN nalezený v jiné objednávce nebo line se označí
+  k ověření místo přiřazení cizího odkazu či operace.
+  Chybějící QR se doplní pouze při jediném odpovídajícím kódu. Více variant
+  **téže kombinace EAN + objednávka + line** se nabídne v sekci **Nelze přidělit
+  odkaz**. Nabídka u položky obsahuje QR, operaci a interní záznam a po výběru
+  zůstává dostupná pro změnu volby. Již uložený QR, který neodpovídá přesné
+  shodě, zůstane označený ke kontrole; správnou variantu lze vybrat ručně.
 - **Druhý list – sestavy a poddíly:** nastavuje se **EAN sestavy** a **EAN poddílu**,
   případně index, objednávka a probíhající operace. Platí pouze pro druhý list.
   Doplní se poddíly **všech operací**, včetně dílů bez odkazu; následně je můžeš
@@ -97,6 +100,9 @@ Třetí krok **Evidence pohybu** nemusíš vyplnit: použij **Přeskočit a vytv
   Limit je 500 poddílů na jednu sestavu; případné překročení import oznámí.
 
 Při prvním importu se ukážou dvě samostatná okna s náhledem a volba se zapamatuje.
+Po aktualizaci z verze 1.5 nebo starší se nastavení obou listů otevře znovu: doplň
+objednávku a line/index také v prvním listu. Staré nabídky variant sestavené jen
+podle EANu se odstraní a znovu vytvoří z nahraného plánu podle přesné shody.
 Tlačítkem **Upravit sloupce** lze nastavení znovu otevřít. Soubor jen s prvním listem
 se také načte; žádná pole sestavy po něm aplikace nepožaduje.
 

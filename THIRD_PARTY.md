@@ -40,3 +40,6 @@ poznámky s automatickou výškou a tisk dlouhých poznámek přes více stran.
 
 Verze 1.5: přímý výběr QR variant s operací a interním záznamem; místní uchování
 záznamů nepřiřazených QR kódů pro pozdější načtení plánu a výběr varianty.
+
+Verze 1.6: mapování objednávky a line/indexu v prvním listu plánu, přesné párování
+obou listů a oddělení QR variant stejného EANu pro různé objednávky nebo line.

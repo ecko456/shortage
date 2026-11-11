@@ -9,7 +9,7 @@ on:
       tag:
         description: Verze vydání (například v1.0.0)
         required: true
-        default: v1.5.0
+        default: v1.6.0
         type: string
 permissions:
   contents: write
@@ -56,7 +56,9 @@ jobs:
 
           Stáhněte soubor .exe a spusťte jej. Instalace ani server nejsou potřeba. Balíček není digitálně podepsaný; Windows může při prvním spuštění zobrazit SmartScreen.
 
-          U položek s více možnostmi QR odkazu je přímo v seznamu rozbalovací nabídka. Každá varianta ukazuje svůj QR kód, probíhající operaci z výrobního plánu a dostupný interní záznam z evidence pohybu (stav, množství a čas). Chybějící záznam je výslovně označený. Volba přiřadí odpovídající odkaz, operaci i záznam. Údaje a výběr přežijí restart. Evidence může být nahraná před plánem i po něm; starší záznamy nepřepisují novější. Pro úplné údaje u seznamů ze starší verze nahrajte výrobní plán a případně evidenci znovu.
+          První list výrobního plánu nyní nabízí EAN, číslo objednávky, line/index a probíhající operaci. Odkazy, operace i nabídky QR variant se párují podle kombinace EAN + objednávka + line, stejně jako ve druhém listu sestav. Varianty jiné objednávky nebo line se nepřimíchají. Chybějící či neshodné údaje nevedou k odhadu pouze podle EANu. Již uložený QR odlišný od přesné shody se označí k ručnímu ověření.
+
+          Po aktualizaci nahrajte výrobní plán znovu. Nastavení prvního listu se otevře a je potřeba doplnit objednávku a line/index. Staré nabídky variant párované jen EANem se znovu sestaví podle přesné shody; uložené poznámky a stavy zůstávají.
 
           Zachované funkce: Vložit ze schránky, výrobní plán s prvním listem dílů a druhým listem sestav/poddílů, volitelná evidence pohybu, priority, oddělení, PDF s QR a rozbor do Excelu. Ruční opravy se ukládají místně a promítají do exportů. Při aktualizaci zavřete staré okno a spusťte nový soubor .exe. Dosavadní data zůstanou zachována.
 
